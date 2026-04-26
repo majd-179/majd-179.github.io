@@ -260,6 +260,43 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .btn-danger{background:var(--red-bg);border:none;border-radius:var(--radius-sm);color:var(--red);font-family:'Tajawal',sans-serif;font-size:14px;padding:9px 16px;cursor:pointer;}
 .btn-danger:hover{background:rgba(239,68,68,0.2);}
 
+/* ══ Score bar ══ */
+.card-score-bar{margin-top:6px;}
+.score-bar-track{height:4px;background:var(--surface3);border-radius:4px;overflow:hidden;margin-bottom:3px;}
+.score-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#f5a623,#ff6b35);transition:width 0.5s ease;}
+.card-score-label{font-size:10px;color:#f5a623;font-weight:700;}
+
+/* ══ Search clear btn ══ */
+.search-clear{position:absolute;left:10px;top:50%;transform:translateY(-50%);background:var(--surface3);border:none;color:var(--muted2);font-size:12px;width:18px;height:18px;border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1;transition:all 0.15s;}
+.search-clear.visible{display:flex;}
+.search-clear:hover{background:var(--surface4);color:var(--text);}
+
+/* ══ Active category chip in hero ══ */
+.hero-cat-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:20px;padding:3px 10px 3px 8px;
+  font-size:11px;color:var(--text2);font-weight:600;
+  margin-top:4px;transition:all 0.2s;
+}
+.hero-cat-chip-dot{width:6px;height:6px;border-radius:50%;}
+
+/* ══ Stats bar always visible ══ */
+.stats-always{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;}
+.stat-always{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 14px;
+  text-align:center;flex:1;min-width:65px;
+  position:relative;overflow:hidden;transition:transform 0.18s,border-color 0.18s;
+}
+.stat-always::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--stat-color,var(--accent));opacity:0.6;
+}
+.stat-always:hover{transform:translateY(-2px);border-color:var(--border2);}
+.stat-always .stat-num{font-family:'Cairo',sans-serif;font-size:20px;font-weight:900;background:linear-gradient(135deg,var(--text),var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-always .stat-lbl{font-size:10px;color:var(--muted);margin-top:1px;}
+
 /* ══ Stats & Random pages ══ */
 .fullpage-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:150;overflow-y:auto;}
 .fullpage-overlay.open{display:block;}
@@ -555,6 +592,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <div>
         <div class="hero-title">المكتبة</div>
         <div class="hero-sub">أنمي · مانغا · كتب · ألعاب · أفلام · مسلسلات</div>
+        <div id="lib-hero-chip" class="hero-cat-chip" style="display:none"></div>
       </div>
     </button>
     <div class="hero-right">
@@ -565,6 +603,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input type="text" id="lib-search" placeholder="ابحث بالاسم أو الملاحظات...">
+      <button class="search-clear" id="lib-search-clear" onclick="clearLibSearch()" title="مسح">✕</button>
     </div>
     <select class="sort-select" id="lib-sort" onchange="renderLib()">
       <option value="date-desc">الأحدث أولاً</option>
@@ -575,7 +614,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </select>
     <button class="add-btn lib-add" onclick="openAdd(null,'lib')">+ إضافة</button>
   </div>
-  <div class="stats" id="lib-stats" style="display:none"></div>
+  <div class="stats-always" id="lib-stats"></div>
   <div class="cat-nav" id="lib-cat-nav"></div>
   <div id="lib-section"></div>
 </div>
@@ -597,6 +636,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input type="text" id="social-search" placeholder="ابحث بالاسم أو الملاحظات...">
+      <button class="search-clear" id="social-search-clear" onclick="clearSocialSearch()" title="مسح">✕</button>
     </div>
     <select class="sort-select" id="social-sort" onchange="renderSocial()">
       <option value="date-desc">الأحدث أولاً</option>
@@ -605,7 +645,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </select>
     <button class="add-btn social-add" onclick="openAdd(null,'social')">+ إضافة</button>
   </div>
-  <div class="stats" id="social-stats" style="display:none"></div>
+  <div class="stats-always" id="social-stats"></div>
   <div class="cat-nav" id="social-cat-nav"></div>
   <div id="social-section"></div>
 </div>
@@ -782,15 +822,15 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       <div class="profile-stats-grid">
         <div class="profile-stat">
           <div class="profile-stat-num" id="pstat-total">0</div>
-          <div class="profile-stat-lbl">إجمالي</div>
+          <div class="profile-stat-lbl">الكل</div>
         </div>
         <div class="profile-stat">
           <div class="profile-stat-num" id="pstat-done">0</div>
-          <div class="profile-stat-lbl">✅ أتممته</div>
+          <div class="profile-stat-lbl">✅ مكتمل</div>
         </div>
         <div class="profile-stat">
           <div class="profile-stat-num" id="pstat-watching">0</div>
-          <div class="profile-stat-lbl">⏳ جارٍ</div>
+          <div class="profile-stat-lbl">▶ قيد المشاهدة</div>
         </div>
       </div>
       <!-- توزيع الفئات -->
@@ -1066,35 +1106,54 @@ function menuHTML(id){
 
 // ══ RENDER LIB ══
 function renderLib(){
-  // sync from cloud updates
-  
   const libItems=window.items.filter(i=>isLib(i.cat));
   const t=libItems.length,d=libItems.filter(i=>i.status==='completed').length,
         w=libItems.filter(i=>i.status==='watching').length,p=libItems.filter(i=>i.status==='planned').length;
+
+  // Stats bar — دايماً ظاهر مع لون مميّز
   document.getElementById('lib-stats').innerHTML=`
-    <div class="stat"><div class="stat-num">${t}</div><div class="stat-lbl">إجمالي</div></div>
-    <div class="stat"><div class="stat-num">${d}</div><div class="stat-lbl">✅ أتممته</div></div>
-    <div class="stat"><div class="stat-num">${w}</div><div class="stat-lbl">⏳ جارٍ</div></div>
-    <div class="stat"><div class="stat-num">${p}</div><div class="stat-lbl">📌 مخطط</div></div>`;
+    <div class="stat-always" style="--stat-color:var(--accent)"><div class="stat-num">${t}</div><div class="stat-lbl">الكل</div></div>
+    <div class="stat-always" style="--stat-color:var(--green)"><div class="stat-num">${d}</div><div class="stat-lbl">✅ مكتمل</div></div>
+    <div class="stat-always" style="--stat-color:var(--blue)"><div class="stat-num">${w}</div><div class="stat-lbl">▶ قيد المشاهدة</div></div>
+    <div class="stat-always" style="--stat-color:var(--purple)"><div class="stat-num">${p}</div><div class="stat-lbl">🕐 قائمة الانتظار</div></div>`;
+
   document.getElementById('nav-lib-cnt').textContent=t;
+
+  // Cat nav
   document.getElementById('lib-cat-nav').innerHTML=LIB_CATS.map(c=>{
     const cnt=window.items.filter(i=>i.cat===c.id).length;
     const active=activeLibCat===c.id;
     return `<button class="cat-btn${active?' active':''}" style="--cat-color:${c.color};--cat-glow:${c.glow};" onclick="setLibCat('${c.id}')">
       ${c.icon} ${c.id}<span class="cnt">${cnt}</span></button>`;
   }).join('');
+
+  // Hero chip
   const cat=LIB_CATS.find(c=>c.id===activeLibCat)||LIB_CATS[0];
+  const catCnt=window.items.filter(i=>i.cat===activeLibCat).length;
+  const chip=document.getElementById('lib-hero-chip');
+  if(chip){
+    chip.style.display='inline-flex';
+    chip.innerHTML=`<span class="hero-cat-chip-dot" style="background:${cat.color}"></span>${cat.icon} ${cat.id} · ${catCnt}`;
+    chip.style.borderColor=cat.color.replace('var(--','').replace(')','')&&cat.color||'var(--border2)';
+  }
+
   const sf=catStatus[activeLibCat];
   const q=libSearch;
   let filtered=sortItems(window.items.filter(i=>i.cat===activeLibCat&&(sf==='الكل'||STATUS_LABEL[i.status]===sf)&&matchSearch(i,q)),'lib-sort');
   const pills=STATUSES.map(s=>`<button class="pill${sf===s?' active':''}" onclick="setLibStatus('${s}')">${s}</button>`).join('');
-  let cards=filtered.map((i,idx)=>`
-    <div class="card" style="animation-delay:${idx*0.04}s;--cat-color-border:${cat.border}">
+
+  let cards=filtered.map((i,idx)=>{
+    const scoreBar=i.score?`<div class="card-score-bar">
+      <div class="score-bar-track"><div class="score-bar-fill" style="width:${i.score*10}%"></div></div>
+      <span class="card-score-label">★ ${i.score}/10</span>
+    </div>`:'';
+    return `
+    <div class="card" style="animation-delay:${idx*0.035}s;--cat-color-border:${cat.border}">
       ${menuHTML(i.id)}
       ${i.note?`<div class="has-note-dot"></div>`:''}
       <div class="card-inner" onclick="openDetail(${i.id})">
         <div class="card-img-wrap">
-          ${i.img?`<img class="card-img" src="${i.img}" loading="lazy">`:`<div class="card-img-placeholder">${cat.icon}</div>`}
+          ${i.img?`<img class="card-img" src="${i.img}" loading="lazy">`:`<div class="card-img-placeholder" style="background:linear-gradient(135deg,${cat.color}22,${cat.color}11)">${cat.icon}</div>`}
         </div>
         <div class="card-body">
           <div class="card-name">${i.name}</div>
@@ -1105,11 +1164,12 @@ function renderLib(){
           </div>
           <div class="card-bottom">
             <span class="status-badge ${STATUS_CLASS[i.status]}">${STATUS_LABEL[i.status]}</span>
-            ${i.score?`<span class="card-score">★ ${i.score}</span>`:''}
           </div>
+          ${scoreBar}
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   cards+=`<button class="add-card lib-add-card" onclick="openAdd('${activeLibCat}','lib')"><span class="plus">+</span>إضافة</button>`;
   document.getElementById('lib-section').innerHTML=`
     <div>
@@ -1123,13 +1183,15 @@ function renderLib(){
 
 // ══ RENDER SOCIAL ══
 function renderSocial(){
-  // sync from cloud updates
   const socialItems=window.items.filter(i=>isSocial(i.cat));
+  const musicCnt=window.items.filter(i=>i.cat==='موسيقى').length;
+  const ytCnt=window.items.filter(i=>i.cat==='يوتيوب').length;
+  const instaCnt=window.items.filter(i=>i.cat==='انستغرام').length;
   document.getElementById('social-stats').innerHTML=`
-    <div class="stat"><div class="stat-num">${socialItems.length}</div><div class="stat-lbl">إجمالي</div></div>
-    <div class="stat"><div class="stat-num">${window.items.filter(i=>i.cat==='موسيقى').length}</div><div class="stat-lbl">🎵 موسيقى</div></div>
-    <div class="stat"><div class="stat-num">${window.items.filter(i=>i.cat==='يوتيوب').length}</div><div class="stat-lbl">▶️ يوتيوب</div></div>
-    <div class="stat"><div class="stat-num">${window.items.filter(i=>i.cat==='انستغرام').length}</div><div class="stat-lbl">📸 انستغرام</div></div>`;
+    <div class="stat-always" style="--stat-color:var(--music)"><div class="stat-num">${socialItems.length}</div><div class="stat-lbl">إجمالي</div></div>
+    <div class="stat-always" style="--stat-color:var(--music)"><div class="stat-num">${musicCnt}</div><div class="stat-lbl">🎵 موسيقى</div></div>
+    <div class="stat-always" style="--stat-color:var(--youtube)"><div class="stat-num">${ytCnt}</div><div class="stat-lbl">▶️ يوتيوب</div></div>
+    <div class="stat-always" style="--stat-color:var(--insta)"><div class="stat-num">${instaCnt}</div><div class="stat-lbl">📸 انستغرام</div></div>`;
   document.getElementById('nav-social-cnt').textContent=socialItems.length;
   document.getElementById('social-cat-nav').innerHTML=SOCIAL_CATS.map(c=>{
     const cnt=window.items.filter(i=>i.cat===c.id).length;
@@ -1269,9 +1331,9 @@ function openStatsPage(){
   const maxCat=ALL_CATS.map(c=>({...c,count:window.items.filter(i=>i.cat===c.id).length})).sort((a,b)=>b.count-a.count)[0];
   let html=`<div class="stats-grid">
     <div class="stats-card"><div class="num">${window.items.length}</div><div class="lbl">إجمالي الكل</div></div>
-    <div class="stats-card"><div class="num">${libItems.filter(i=>i.status==='completed').length}</div><div class="lbl">✅ أتممته</div></div>
-    <div class="stats-card"><div class="num">${libItems.filter(i=>i.status==='watching').length}</div><div class="lbl">⏳ جارٍ</div></div>
-    <div class="stats-card"><div class="num">${libItems.filter(i=>i.status==='planned').length}</div><div class="lbl">📌 مخطط</div></div>
+    <div class="stats-card"><div class="num">${libItems.filter(i=>i.status==='completed').length}</div><div class="lbl">✅ مكتمل</div></div>
+    <div class="stats-card"><div class="num">${libItems.filter(i=>i.status==='watching').length}</div><div class="lbl">▶ قيد المشاهدة</div></div>
+    <div class="stats-card"><div class="num">${libItems.filter(i=>i.status==='planned').length}</div><div class="lbl">🕐 قائمة الانتظار</div></div>
     <div class="stats-card"><div class="num">${avg}</div><div class="lbl">⭐ متوسط التقييم</div></div>
     <div class="stats-card"><div class="num">${maxCat?.count||0}</div><div class="lbl">أكثر قسم ${maxCat?.icon||''} ${maxCat?.id||''}</div></div>
   </div>`;
@@ -1333,8 +1395,36 @@ function showToast(msg){
 
 
 // ══ EVENTS ══
-document.getElementById('lib-search').addEventListener('input',e=>{libSearch=e.target.value;renderLib();});
-document.getElementById('social-search').addEventListener('input',e=>{socialSearch=e.target.value;renderSocial();});
+document.getElementById('lib-search').addEventListener('input',e=>{
+  libSearch=e.target.value;
+  const clr=document.getElementById('lib-search-clear');
+  if(clr) clr.classList.toggle('visible', libSearch.length>0);
+  renderLib();
+});
+document.getElementById('social-search').addEventListener('input',e=>{
+  socialSearch=e.target.value;
+  const clr=document.getElementById('social-search-clear');
+  if(clr) clr.classList.toggle('visible', socialSearch.length>0);
+  renderSocial();
+});
+function clearLibSearch(){
+  libSearch='';
+  const inp=document.getElementById('lib-search');
+  if(inp) inp.value='';
+  const clr=document.getElementById('lib-search-clear');
+  if(clr) clr.classList.remove('visible');
+  renderLib();
+}
+function clearSocialSearch(){
+  socialSearch='';
+  const inp=document.getElementById('social-search');
+  if(inp) inp.value='';
+  const clr=document.getElementById('social-search-clear');
+  if(clr) clr.classList.remove('visible');
+  renderSocial();
+}
+window.clearLibSearch=clearLibSearch;
+window.clearSocialSearch=clearSocialSearch;
 document.getElementById('modal-bg').addEventListener('click',e=>{if(e.target===document.getElementById('modal-bg'))closeModal();});
 document.getElementById('detail-bg').addEventListener('click',e=>{if(e.target===document.getElementById('detail-bg'))closeDetail();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeDetail();closeStatsPage();closeRandom();}});
