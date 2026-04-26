@@ -581,15 +581,14 @@ function load(){
 }
 window._loadLocal=load;
 function save(){
-  try{localStorage.setItem(SK,JSON.stringify(items));}catch(e){showToast('⚠️ مساحة التخزين ممتلئة');}
-  window.items=items;window.nextId=nextId;
+  try{localStorage.setItem(SK,JSON.stringify(window.items));}catch(e){showToast('⚠️ مساحة التخزين ممتلئة');}
+  
 }
 
-let items=load();
-window.items=items;
-if(!items.length){
+window.items = load();
+if(!window.items.length){
   const now=Date.now();
-  items=[
+  window.items=[
     {id:1,name:'Attack on Titan',cat:'أنمي',status:'completed',score:10,img:'',link:'',priority:'',note:'من أفضل الأنميات!',dateAdded:now-864e5*10},
     {id:2,name:'Demon Slayer',cat:'أنمي',status:'watching',score:null,img:'',link:'',priority:'high',note:'',dateAdded:now-864e5*5},
     {id:3,name:'One Piece',cat:'أنمي',status:'planned',score:null,img:'',link:'',priority:'mid',note:'',dateAdded:now-864e5*3},
@@ -603,8 +602,7 @@ if(!items.length){
   save();
 }
 
-let nextId=Math.max(...items.map(i=>i.id),0)+1;
-window.nextId=nextId;
+window.nextId = Math.max(...window.items.map(i=>i.id),0)+1;
 let activePage='lib';
 let activeLibCat='أنمي';
 let activeSocialCat='موسيقى';
@@ -673,7 +671,7 @@ document.addEventListener('click',closeAllMenus);
 
 // ══ DETAIL ══
 function openDetail(id){
-  const item=items.find(i=>i.id===id);if(!item)return;
+  const item=window.items.find(i=>i.id===id);if(!item)return;
   const cat=catCfg(item.cat);const sc=SOCIAL_CATS.find(c=>c.id===item.cat);
   document.getElementById('detail-img-area').innerHTML=item.img
     ?`<img class="detail-img" src="${item.img}">`
@@ -710,7 +708,7 @@ dz.addEventListener('click',()=>{if(dz.classList.contains('has-img'))triggerFile
 
 // ══ MENU HTML ══
 function menuHTML(id){
-  const item=items.find(i=>i.id===id);
+  const item=window.items.find(i=>i.id===id);
   const sc=item?SOCIAL_CATS.find(c=>c.id===item.cat):null;
   return `<div class="card-menu-wrap" onclick="event.stopPropagation()">
     <button class="card-dots" onclick="toggleMenu(event,${id})">⋯</button>
@@ -726,9 +724,9 @@ function menuHTML(id){
 
 // ══ RENDER LIB ══
 function renderLib(){
-  items=window.items; // sync from cloud updates
-  window.items=items;window.nextId=nextId;
-  const libItems=items.filter(i=>isLib(i.cat));
+  // sync from cloud updates
+  
+  const libItems=window.items.filter(i=>isLib(i.cat));
   const t=libItems.length,d=libItems.filter(i=>i.status==='completed').length,
         w=libItems.filter(i=>i.status==='watching').length,p=libItems.filter(i=>i.status==='planned').length;
   document.getElementById('lib-stats').innerHTML=`
@@ -738,7 +736,7 @@ function renderLib(){
     <div class="stat"><div class="stat-num">${p}</div><div class="stat-lbl">📌 مخطط</div></div>`;
   document.getElementById('nav-lib-cnt').textContent=t;
   document.getElementById('lib-cat-nav').innerHTML=LIB_CATS.map(c=>{
-    const cnt=items.filter(i=>i.cat===c.id).length;
+    const cnt=window.items.filter(i=>i.cat===c.id).length;
     const active=activeLibCat===c.id;
     return `<button class="cat-btn${active?' active':''}" style="--cat-color:${c.color};--cat-glow:${c.glow};" onclick="setLibCat('${c.id}')">
       ${c.icon} ${c.id}<span class="cnt">${cnt}</span></button>`;
@@ -746,7 +744,7 @@ function renderLib(){
   const cat=LIB_CATS.find(c=>c.id===activeLibCat)||LIB_CATS[0];
   const sf=catStatus[activeLibCat];
   const q=libSearch;
-  let filtered=sortItems(items.filter(i=>i.cat===activeLibCat&&(sf==='الكل'||STATUS_LABEL[i.status]===sf)&&matchSearch(i,q)),'lib-sort');
+  let filtered=sortItems(window.items.filter(i=>i.cat===activeLibCat&&(sf==='الكل'||STATUS_LABEL[i.status]===sf)&&matchSearch(i,q)),'lib-sort');
   const pills=STATUSES.map(s=>`<button class="pill${sf===s?' active':''}" onclick="setLibStatus('${s}')">${s}</button>`).join('');
   let cards=filtered.map((i,idx)=>`
     <div class="card" style="animation-delay:${idx*0.04}s;--cat-color-border:${cat.border}">
@@ -783,23 +781,23 @@ function renderLib(){
 
 // ══ RENDER SOCIAL ══
 function renderSocial(){
-  items=window.items; // sync from cloud updates
-  const socialItems=items.filter(i=>isSocial(i.cat));
+  // sync from cloud updates
+  const socialItems=window.items.filter(i=>isSocial(i.cat));
   document.getElementById('social-stats').innerHTML=`
     <div class="stat"><div class="stat-num">${socialItems.length}</div><div class="stat-lbl">إجمالي</div></div>
-    <div class="stat"><div class="stat-num">${items.filter(i=>i.cat==='موسيقى').length}</div><div class="stat-lbl">🎵 موسيقى</div></div>
-    <div class="stat"><div class="stat-num">${items.filter(i=>i.cat==='يوتيوب').length}</div><div class="stat-lbl">▶️ يوتيوب</div></div>
-    <div class="stat"><div class="stat-num">${items.filter(i=>i.cat==='انستغرام').length}</div><div class="stat-lbl">📸 انستغرام</div></div>`;
+    <div class="stat"><div class="stat-num">${window.items.filter(i=>i.cat==='موسيقى').length}</div><div class="stat-lbl">🎵 موسيقى</div></div>
+    <div class="stat"><div class="stat-num">${window.items.filter(i=>i.cat==='يوتيوب').length}</div><div class="stat-lbl">▶️ يوتيوب</div></div>
+    <div class="stat"><div class="stat-num">${window.items.filter(i=>i.cat==='انستغرام').length}</div><div class="stat-lbl">📸 انستغرام</div></div>`;
   document.getElementById('nav-social-cnt').textContent=socialItems.length;
   document.getElementById('social-cat-nav').innerHTML=SOCIAL_CATS.map(c=>{
-    const cnt=items.filter(i=>i.cat===c.id).length;
+    const cnt=window.items.filter(i=>i.cat===c.id).length;
     const active=activeSocialCat===c.id;
     return `<button class="cat-btn${active?' active':''}" style="--cat-color:${c.color};--cat-glow:${c.glow};" onclick="setSocialCat('${c.id}')">
       ${c.icon} ${c.id}<span class="cnt">${cnt}</span></button>`;
   }).join('');
   const cat=SOCIAL_CATS.find(c=>c.id===activeSocialCat)||SOCIAL_CATS[0];
   const q=socialSearch;
-  let filtered=sortItems(items.filter(i=>i.cat===activeSocialCat&&matchSearch(i,q)),'social-sort');
+  let filtered=sortItems(window.items.filter(i=>i.cat===activeSocialCat&&matchSearch(i,q)),'social-sort');
   let cards=filtered.map((i,idx)=>`
     <div class="social-card scat-${i.cat}" style="animation-delay:${idx*0.04}s">
       ${menuHTML(i.id)}
@@ -861,7 +859,7 @@ function openAdd(presetCat, tab){
 }
 
 function openEdit(id){
-  const item=items.find(i=>i.id===id);if(!item)return;
+  const item=window.items.find(i=>i.id===id);if(!item)return;
   editingId=id;resetImgUI();
   document.getElementById('modal-title').textContent='تعديل العنصر';
   document.getElementById('modal-save-btn').textContent='حفظ التعديلات';
@@ -902,11 +900,11 @@ function saveItem(){
   const chapter=(!social&&cat==='مانغا'&&cv)?parseInt(cv):null;
   const img=currentImgData||'';
   if(editingId){
-    const idx=items.findIndex(i=>i.id===editingId);
-    if(idx>-1)items[idx]={...items[idx],name,cat,status,score,link,priority,note,chapter,img};
+    const idx=window.items.findIndex(i=>i.id===editingId);
+    if(idx>-1)window.items[idx]={...window.items[idx],name,cat,status,score,link,priority,note,chapter,img};
     showToast('تم الحفظ ✓');
   } else {
-    items.unshift({id:nextId++,name,cat,status,score,link,priority,note,chapter,img,dateAdded:Date.now()});
+    window.items.unshift({id:window.nextId++,name,cat,status,score,link,priority,note,chapter,img,dateAdded:Date.now()});
     if(social){activeSocialCat=cat;switchPage('social');}
     else{activeLibCat=cat;catStatus[cat]='الكل';switchPage('lib');}
     showToast('تمت الإضافة ✓');
@@ -916,19 +914,19 @@ function saveItem(){
 }
 
 function deleteItem(id){
-  items=items.filter(i=>i.id!==id);save();closeModal();
+  window.items=window.items.filter(i=>i.id!==id);save();closeModal();
   if(activePage==='lib')renderLib(); else renderSocial();
   showToast('تم الحذف');
 }
 
 // ══ STATS ══
 function openStatsPage(){
-  const libItems=items.filter(i=>isLib(i.cat));
+  const libItems=window.items.filter(i=>isLib(i.cat));
   const scored=libItems.filter(i=>i.score);
   const avg=scored.length?(scored.reduce((s,i)=>s+i.score,0)/scored.length).toFixed(1):'-';
-  const maxCat=ALL_CATS.map(c=>({...c,count:items.filter(i=>i.cat===c.id).length})).sort((a,b)=>b.count-a.count)[0];
+  const maxCat=ALL_CATS.map(c=>({...c,count:window.items.filter(i=>i.cat===c.id).length})).sort((a,b)=>b.count-a.count)[0];
   let html=`<div class="stats-grid">
-    <div class="stats-card"><div class="num">${items.length}</div><div class="lbl">إجمالي الكل</div></div>
+    <div class="stats-card"><div class="num">${window.items.length}</div><div class="lbl">إجمالي الكل</div></div>
     <div class="stats-card"><div class="num">${libItems.filter(i=>i.status==='completed').length}</div><div class="lbl">✅ أتممته</div></div>
     <div class="stats-card"><div class="num">${libItems.filter(i=>i.status==='watching').length}</div><div class="lbl">⏳ جارٍ</div></div>
     <div class="stats-card"><div class="num">${libItems.filter(i=>i.status==='planned').length}</div><div class="lbl">📌 مخطط</div></div>
@@ -937,7 +935,7 @@ function openStatsPage(){
   </div>`;
   html+=`<div class="stats-section"><div class="stats-section-title">📚 تقدم المكتبة</div>`;
   LIB_CATS.forEach(cat=>{
-    const ci=items.filter(i=>i.cat===cat.id);if(!ci.length)return;
+    const ci=window.items.filter(i=>i.cat===cat.id);if(!ci.length)return;
     const done=ci.filter(i=>i.status==='completed').length;
     const pct=Math.round((done/ci.length)*100);
     html+=`<div class="progress-row"><div class="progress-label">${cat.icon} ${cat.id}</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%;background:${cat.color}"></div></div><div class="progress-count">${done}/${ci.length}</div></div>`;
@@ -946,7 +944,7 @@ function openStatsPage(){
   if(scored.length){
     html+=`<div class="stats-section"><div class="stats-section-title">★ متوسط التقييم</div>`;
     LIB_CATS.forEach(cat=>{
-      const sc=items.filter(i=>i.cat===cat.id&&i.score);if(!sc.length)return;
+      const sc=window.items.filter(i=>i.cat===cat.id&&i.score);if(!sc.length)return;
       const a=(sc.reduce((s,i)=>s+i.score,0)/sc.length).toFixed(1);
       html+=`<div class="progress-row"><div class="progress-label">${cat.icon} ${cat.id}</div><div class="progress-bar-wrap"><div class="progress-bar" style="width:${(a/10)*100}%;background:${cat.color}"></div></div><div class="progress-count">★${a}</div></div>`;
     });
@@ -966,7 +964,7 @@ function renderRandomFilter(){
 }
 function setRandomCat(c){randomCat=c;renderRandomFilter();document.getElementById('random-result').innerHTML='';}
 function spinRandom(){
-  let pool=items.filter(i=>i.status==='planned'&&isLib(i.cat));
+  let pool=window.items.filter(i=>i.status==='planned'&&isLib(i.cat));
   if(randomCat!=='الكل')pool=pool.filter(i=>i.cat===randomCat);
   if(!pool.length){document.getElementById('random-result').innerHTML=`<div class="random-empty">لا يوجد عناصر في قائمة "أرغب بمشاهدته" 😅</div>`;return;}
   const item=pool[Math.floor(Math.random()*pool.length)];
