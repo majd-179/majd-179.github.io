@@ -317,9 +317,23 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 /* ══ Settings Panel ══ */
 .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:500;display:none;}
 .settings-overlay.open{display:block;}
-.settings-panel{position:fixed;top:0;left:0;width:300px;max-width:90vw;height:100vh;background:var(--surface2);border-right:1px solid var(--border2);z-index:501;display:flex;flex-direction:column;gap:0;overflow-y:auto;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.34,1.2,0.64,1);box-shadow:6px 0 30px rgba(0,0,0,0.4);}
-html[dir=rtl] .settings-panel{left:auto;right:0;border-right:none;border-left:1px solid var(--border2);transform:translateX(100%);}
+.settings-panel{
+  position:fixed;top:0;right:0;left:auto;
+  width:320px;
+  height:100vh;
+  background:var(--surface2);
+  border-left:1px solid var(--border2);
+  z-index:501;
+  display:flex;flex-direction:column;gap:0;
+  overflow-y:auto;
+  transform:translateX(100%);
+  transition:transform 0.3s cubic-bezier(0.34,1.2,0.64,1);
+  box-shadow:-6px 0 30px rgba(0,0,0,0.4);
+}
 .settings-panel.open{transform:translateX(0);}
+@media(max-width:680px){
+  .settings-panel{width:55vw;min-width:220px;}
+}
 .settings-header{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.2rem 1rem;border-bottom:1px solid var(--border);}
 .settings-title{font-family:"Cairo",sans-serif;font-size:17px;font-weight:900;}
 .settings-close{background:var(--surface3);border:1px solid var(--border2);color:var(--muted2);font-size:14px;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
@@ -362,7 +376,7 @@ html[dir=rtl] .settings-panel{left:auto;right:0;border-right:none;border-left:1p
     </div>
     <div class="hero-right">
       <button class="icon-btn" onclick="openRandom()" title="اختار لي عشوائياً">🎲</button>
-      <button class="icon-btn settings-gear-btn" onclick="openSettings()" title="الإعدادات">⚙️</button>
+      <button class="icon-btn settings-gear-btn" data-action="openSettings" title="الإعدادات">⚙️</button>
     </div>
   </div>
   <div class="toolbar">
@@ -395,7 +409,7 @@ html[dir=rtl] .settings-panel{left:auto;right:0;border-right:none;border-left:1p
       </div>
     </div>
     <div class="hero-right">
-      <button class="icon-btn settings-gear-btn" onclick="openSettings()" title="الإعدادات">⚙️</button>
+      <button class="icon-btn settings-gear-btn" data-action="openSettings" title="الإعدادات">⚙️</button>
     </div>
   </div>
   <div class="toolbar">
@@ -559,20 +573,20 @@ html[dir=rtl] .settings-panel{left:auto;right:0;border-right:none;border-left:1p
 </div>
 
 <!-- ══ Settings Panel ══ -->
-<div class="settings-overlay" id="settings-overlay" onclick="closeSettings()"></div>
+<div class="settings-overlay" id="settings-overlay"></div>
 <div class="settings-panel" id="settings-panel">
   <div class="settings-header">
     <div class="settings-title">⚙️ الإعدادات</div>
-    <button class="settings-close" onclick="closeSettings()">✕</button>
+    <button class="settings-close" id="settings-close-btn">✕</button>
   </div>
 
   <div class="settings-section-label">العرض</div>
-  <button class="settings-item" onclick="openStatsPage();closeSettings()">
+  <button class="settings-item" id="settings-stats-btn">
     <span class="settings-item-icon">📊</span>
     <span class="settings-item-text">الإحصائيات</span>
     <span class="settings-item-arrow">›</span>
   </button>
-  <button class="settings-item" onclick="toggleTheme()">
+  <button class="settings-item" id="settings-theme-btn">
     <span class="settings-item-icon" id="theme-settings-icon">🌙</span>
     <span class="settings-item-text" id="theme-settings-text">الوضع الليلي</span>
     <span class="settings-item-arrow">›</span>
@@ -588,13 +602,13 @@ html[dir=rtl] .settings-panel{left:auto;right:0;border-right:none;border-left:1p
   </div>
 
   <div class="settings-switch-wrap" id="settings-switch-wrap">
-    <button class="settings-item" onclick="toggleSwitchMenu()">
+    <button class="settings-item" id="settings-switch-btn">
       <span class="settings-item-icon">🔄</span>
       <span class="settings-item-text">تبديل الحساب</span>
       <span class="settings-item-arrow" id="switch-arrow">›</span>
     </button>
     <div class="switch-submenu" id="switch-submenu" style="display:none">
-      <button class="settings-item sub-item" onclick="addNewAccount()">
+      <button class="settings-item sub-item" id="settings-add-account-btn">
         <span class="settings-item-icon">➕</span>
         <span class="settings-item-text">إضافة حساب</span>
       </button>
@@ -602,7 +616,7 @@ html[dir=rtl] .settings-panel{left:auto;right:0;border-right:none;border-left:1p
     </div>
   </div>
 
-  <button class="settings-item settings-logout" onclick="handleLogout()">
+  <button class="settings-item settings-logout" id="settings-logout-btn">
     <span class="settings-item-icon">🚪</span>
     <span class="settings-item-text">تسجيل الخروج</span>
   </button>
@@ -1054,105 +1068,6 @@ function showToast(msg){
 }
 
 
-// ══ SETTINGS PANEL ══
-let savedAccounts = JSON.parse(localStorage.getItem('mk_saved_accounts') || '{}');
-
-function openSettings(){
-  const user = window._firebaseAuth ? window._firebaseAuth.currentUser : null;
-  const userInfo = document.getElementById('settings-user-info');
-  const switchWrap = document.getElementById('settings-switch-wrap');
-  if(user){
-    const av=document.getElementById('settings-avatar');
-    av.src = user.photoURL || '';
-    av.style.display = user.photoURL ? 'block' : 'none';
-    document.getElementById('settings-user-name').textContent = user.displayName || 'مرحباً';
-    document.getElementById('settings-user-email').textContent = user.email || '';
-    userInfo.style.display = 'flex';
-    switchWrap.style.display = 'block';
-    if(user.uid){
-      savedAccounts[user.uid] = {name: user.displayName||'حساب', email: user.email||'', photo: user.photoURL||''};
-      localStorage.setItem('mk_saved_accounts', JSON.stringify(savedAccounts));
-    }
-  } else {
-    userInfo.style.display = 'none';
-    switchWrap.style.display = 'none';
-  }
-  const ti=document.getElementById('theme-settings-icon');
-  const tt=document.getElementById('theme-settings-text');
-  if(ti)ti.textContent=isDark?'🌙':'☀️';
-  if(tt)tt.textContent=isDark?'الوضع الليلي':'الوضع النهاري';
-  const sub = document.getElementById('switch-submenu');
-  if(sub) sub.style.display='none';
-  const arrow = document.getElementById('switch-arrow');
-  if(arrow) arrow.textContent='›';
-  document.getElementById('settings-overlay').classList.add('open');
-  document.getElementById('settings-panel').classList.add('open');
-}
-
-function closeSettings(){
-  document.getElementById('settings-overlay').classList.remove('open');
-  document.getElementById('settings-panel').classList.remove('open');
-}
-
-function toggleSwitchMenu(){
-  const sub = document.getElementById('switch-submenu');
-  const arrow = document.getElementById('switch-arrow');
-  const isOpen = sub.style.display !== 'none';
-  if(isOpen){
-    sub.style.display='none';
-    if(arrow) arrow.textContent='›';
-  } else {
-    const user = window._firebaseAuth ? window._firebaseAuth.currentUser : null;
-    const list = document.getElementById('saved-accounts-list');
-    let html = '';
-    for(const [uid, acc] of Object.entries(savedAccounts)){
-      const isCurrent = user && user.uid === uid;
-      const photoHtml = acc.photo ? `<img src="${acc.photo}" alt="">` : `<span style="font-size:20px">👤</span>`;
-      const activeHtml = isCurrent ? `<span class="acc-active">نشط</span>` : '';
-      html += `<button class="saved-account-btn" onclick="switchToAccount('${uid}')">${photoHtml}<span class="acc-name">${acc.name}<br><span style="font-size:10px;color:var(--muted2)">${acc.email}</span></span>${activeHtml}</button>`;
-    }
-    list.innerHTML = html || `<div style="padding:8px 1rem;font-size:12px;color:var(--muted)">لا توجد حسابات محفوظة</div>`;
-    sub.style.display='block';
-    if(arrow) arrow.textContent='⌄';
-  }
-}
-
-async function switchToAccount(uid){
-  closeSettings();
-  const _auth = window._firebaseAuth;
-  const _so = window._signOut;
-  if(_auth && _so){
-    showToast('جارٍ تبديل الحساب...');
-    try { await _so(_auth); } catch(e) { console.error(e); }
-  }
-}
-
-function addNewAccount(){
-  closeSettings();
-  const _auth = window._firebaseAuth;
-  const _GAP = window._GoogleAuthProvider;
-  const _sip = window._signInWithPopup;
-  if(_auth && _GAP && _sip){
-    const provider = new _GAP();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    _sip(_auth, provider).catch(e => {
-      if(e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') showToast('فشل إضافة الحساب');
-    });
-  } else {
-    showToast('⚠️ الرجاء ربط Firebase أولاً');
-  }
-}
-
-function handleLogout(){
-  closeSettings();
-  const _auth = window._firebaseAuth;
-  if(_auth && _auth.currentUser){
-    const name = _auth.currentUser.displayName;
-    if(!confirm('هل تريد تسجيل الخروج من حساب ' + name + '؟')) return;
-    window._signOut(_auth);
-  }
-}
-
 // ══ EVENTS ══
 document.getElementById('lib-search').addEventListener('input',e=>{libSearch=e.target.value;renderLib();});
 document.getElementById('social-search').addEventListener('input',e=>{socialSearch=e.target.value;renderSocial();});
@@ -1165,12 +1080,6 @@ window.renderLib=renderLib;
 window.renderSocial=renderSocial;
 window.showToast=showToast;
 window.switchPage=switchPage;
-window.openSettings=openSettings;
-window.closeSettings=closeSettings;
-window.toggleSwitchMenu=toggleSwitchMenu;
-window.switchToAccount=switchToAccount;
-window.addNewAccount=addNewAccount;
-window.handleLogout=handleLogout;
 window.toggleTheme=toggleTheme;
 window.openStatsPage=openStatsPage;
 window.closeStatsPage=closeStatsPage;
@@ -1338,11 +1247,131 @@ function startListening(uid) {
   });
 }
 
-// ══ نشر دوال Firebase عالمياً للإعدادات ══
-window._firebaseAuth = auth;
-window._signOut = signOut;
-window._GoogleAuthProvider = GoogleAuthProvider;
-window._signInWithPopup = signInWithPopup;
+// ══ ربط أزرار الإعدادات بعد تحميل الـ module ══
+function bindSettingsButtons() {
+  // أزرار فتح الإعدادات
+  document.querySelectorAll('[data-action="openSettings"]').forEach(btn => {
+    btn.addEventListener('click', openSettingsFn);
+  });
+  // إغلاق
+  const overlay = document.getElementById('settings-overlay');
+  const closeBtn = document.getElementById('settings-close-btn');
+  if(overlay) overlay.addEventListener('click', closeSettingsFn);
+  if(closeBtn) closeBtn.addEventListener('click', closeSettingsFn);
+  // الإحصائيات
+  const statsBtn = document.getElementById('settings-stats-btn');
+  if(statsBtn) statsBtn.addEventListener('click', () => { openStatsPage(); closeSettingsFn(); });
+  // تبديل الوضع
+  const themeBtn = document.getElementById('settings-theme-btn');
+  if(themeBtn) themeBtn.addEventListener('click', () => { window.toggleTheme(); syncThemeIcon(); });
+  // تبديل الحساب
+  const switchBtn = document.getElementById('settings-switch-btn');
+  if(switchBtn) switchBtn.addEventListener('click', toggleSwitchMenuFn);
+  // إضافة حساب
+  const addBtn = document.getElementById('settings-add-account-btn');
+  if(addBtn) addBtn.addEventListener('click', addNewAccountFn);
+  // تسجيل الخروج
+  const logoutBtn = document.getElementById('settings-logout-btn');
+  if(logoutBtn) logoutBtn.addEventListener('click', handleLogoutFn);
+}
+
+// ══ دوال الإعدادات ══
+let savedAccounts = JSON.parse(localStorage.getItem('mk_saved_accounts') || '{}');
+
+function syncThemeIcon() {
+  const isDark = !document.body.classList.contains('light');
+  const ti = document.getElementById('theme-settings-icon');
+  const tt = document.getElementById('theme-settings-text');
+  if(ti) ti.textContent = isDark ? '🌙' : '☀️';
+  if(tt) tt.textContent = isDark ? 'الوضع الليلي' : 'الوضع النهاري';
+}
+
+function openSettingsFn() {
+  const user = auth.currentUser;
+  const userInfo = document.getElementById('settings-user-info');
+  const switchWrap = document.getElementById('settings-switch-wrap');
+  if(user) {
+    const av = document.getElementById('settings-avatar');
+    if(user.photoURL){ av.src = user.photoURL; av.style.display='block'; } else { av.style.display='none'; }
+    document.getElementById('settings-user-name').textContent = user.displayName || 'مرحباً';
+    document.getElementById('settings-user-email').textContent = user.email || '';
+    userInfo.style.display = 'flex';
+    switchWrap.style.display = 'block';
+    savedAccounts[user.uid] = {name: user.displayName||'حساب', email: user.email||'', photo: user.photoURL||''};
+    localStorage.setItem('mk_saved_accounts', JSON.stringify(savedAccounts));
+  } else {
+    userInfo.style.display = 'none';
+    switchWrap.style.display = 'none';
+  }
+  syncThemeIcon();
+  const sub = document.getElementById('switch-submenu');
+  if(sub) sub.style.display = 'none';
+  const arrow = document.getElementById('switch-arrow');
+  if(arrow) arrow.textContent = '›';
+  document.getElementById('settings-overlay').classList.add('open');
+  document.getElementById('settings-panel').classList.add('open');
+}
+
+function closeSettingsFn() {
+  document.getElementById('settings-overlay').classList.remove('open');
+  document.getElementById('settings-panel').classList.remove('open');
+}
+
+function toggleSwitchMenuFn() {
+  const sub = document.getElementById('switch-submenu');
+  const arrow = document.getElementById('switch-arrow');
+  const isOpen = sub.style.display !== 'none';
+  if(isOpen) {
+    sub.style.display = 'none';
+    if(arrow) arrow.textContent = '›';
+  } else {
+    const user = auth.currentUser;
+    const list = document.getElementById('saved-accounts-list');
+    let html = '';
+    for(const [uid, acc] of Object.entries(savedAccounts)) {
+      const isCurrent = user && user.uid === uid;
+      const photoHtml = acc.photo ? `<img src="${acc.photo}" alt="">` : `<span style="font-size:20px">👤</span>`;
+      const activeHtml = isCurrent ? `<span class="acc-active">نشط</span>` : '';
+      html += `<button class="saved-account-btn" data-uid="${uid}">${photoHtml}<span class="acc-name">${acc.name}<br><span style="font-size:10px;color:var(--muted2)">${acc.email}</span></span>${activeHtml}</button>`;
+    }
+    list.innerHTML = html || `<div style="padding:8px 1rem;font-size:12px;color:var(--muted)">لا توجد حسابات محفوظة</div>`;
+    // bind clicks on account buttons
+    list.querySelectorAll('.saved-account-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchToAccountFn(btn.dataset.uid));
+    });
+    sub.style.display = 'block';
+    if(arrow) arrow.textContent = '⌄';
+  }
+}
+
+async function switchToAccountFn(uid) {
+  closeSettingsFn();
+  window.showToast('جارٍ تبديل الحساب...');
+  try { await signOut(auth); } catch(e) { console.error(e); }
+}
+
+function addNewAccountFn() {
+  closeSettingsFn();
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  signInWithPopup(auth, provider).catch(e => {
+    if(e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request')
+      window.showToast('فشل إضافة الحساب');
+  });
+}
+
+function handleLogoutFn() {
+  closeSettingsFn();
+  const user = auth.currentUser;
+  if(user) {
+    if(!confirm('هل تريد تسجيل الخروج من حساب ' + (user.displayName||'') + '؟')) return;
+    if(unsubscribe){ try{ off(ref(db, 'users/'+user.uid)); }catch(e){} unsubscribe=null; }
+    signOut(auth);
+  }
+}
+
+// استدعي الربط فوراً
+bindSettingsButtons();
 
 // ══ ربط دالة الحفظ السحابي ══
 window._cloudSave = function() {
