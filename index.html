@@ -585,24 +585,10 @@ function save(){
   
 }
 
-window.items = load();
-if(!window.items.length){
-  const now=Date.now();
-  window.items=[
-    {id:1,name:'Attack on Titan',cat:'أنمي',status:'completed',score:10,img:'',link:'',priority:'',note:'من أفضل الأنميات!',dateAdded:now-864e5*10},
-    {id:2,name:'Demon Slayer',cat:'أنمي',status:'watching',score:null,img:'',link:'',priority:'high',note:'',dateAdded:now-864e5*5},
-    {id:3,name:'One Piece',cat:'أنمي',status:'planned',score:null,img:'',link:'',priority:'mid',note:'',dateAdded:now-864e5*3},
-    {id:4,name:'The Last of Us',cat:'ألعاب',status:'completed',score:10,img:'',link:'',priority:'',note:'تحفة فنية',dateAdded:now-864e5*8},
-    {id:5,name:'Breaking Bad',cat:'مسلسلات',status:'completed',score:9,img:'',link:'',priority:'',note:'',dateAdded:now-864e5*15},
-    {id:6,name:'Dune',cat:'كتب',status:'watching',score:null,img:'',link:'',priority:'mid',note:'',dateAdded:now-864e5*1},
-    {id:7,name:'Interstellar',cat:'أفلام',status:'planned',score:null,img:'',link:'',priority:'',note:'',dateAdded:now-864e5*4},
-    {id:8,name:'Lofi Hip Hop',cat:'موسيقى',status:null,score:null,img:'',link:'https://youtube.com',priority:'',note:'للدراسة',dateAdded:now-864e5*2},
-    {id:9,name:'Kurzgesagt',cat:'يوتيوب',status:null,score:null,img:'',link:'https://youtube.com/@kurzgesagt',priority:'',note:'علمية رائعة',dateAdded:now-864e5*6},
-  ];
-  save();
-}
+window.items  = [];
+window.nextId = 1;
 
-window.nextId = Math.max(...window.items.map(i=>i.id),0)+1;
+
 let activePage='lib';
 let activeLibCat='أنمي';
 let activeSocialCat='موسيقى';
@@ -1006,117 +992,179 @@ renderSocial();
 </script>
 
 <!-- ══════════ FIREBASE ══════════ -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot }
-  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-// ── إعداد Firebase ──
+<script type="module">
+import { initializeApp }                              from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+                                                      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot, getDoc }
+                                                      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+// ══ إعداد Firebase ══
 const firebaseConfig = {
   apiKey: "AIzaSyAv7_et0tR4QcJYgTcSI0vQHPjtb9wLeTY",
   authDomain: "my-library-179.firebaseapp.com",
   projectId: "my-library-179",
   storageBucket: "my-library-179.firebasestorage.app",
   messagingSenderId: "447037989932",
-  appId: "1:447037989932:web:fe28b970ff4d3b14e49d89",
-  measurementId: "G-77K7EB9B60"
+  appId: "1:447037989932:web:fe28b970ff4d3b14e49d89"
 };
-
 const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-let unsubscribeSnapshot = null; // لإيقاف الاستماع عند تسجيل الخروج
+let unsubscribe = null; // مستمع Firestore الحالي
 
-// ── حفظ البيانات على Firestore ──
+// ══ واجهة: شاشة تسجيل الدخول ══
+function showLoginScreen() {
+  // أخفي كل المحتوى
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.querySelector('.bottom-nav').style.display = 'none';
+
+  // أضف شاشة تسجيل الدخول إذا ما كانت موجودة
+  if (!document.getElementById('login-screen')) {
+    const screen = document.createElement('div');
+    screen.id = 'login-screen';
+    screen.style.cssText = `
+      position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;background:var(--bg);z-index:9999;gap:24px;padding:2rem;
+    `;
+    screen.innerHTML = `
+      <div style="font-size:64px">📚</div>
+      <div style="font-family:'Cairo',sans-serif;font-size:28px;font-weight:900;
+        background:linear-gradient(135deg,var(--text) 30%,var(--accent));
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;">مكتبتي</div>
+      <div style="color:var(--muted2);font-size:14px;text-align:center;max-width:280px;line-height:1.8;">
+        سجّل دخولك لحفظ مكتبتك على السحابة ومزامنتها بين أجهزتك
+      </div>
+      <button id="google-signin-btn" style="
+        display:flex;align-items:center;gap:12px;background:#fff;color:#333;
+        border:none;border-radius:12px;padding:14px 28px;font-size:15px;font-weight:700;
+        cursor:pointer;font-family:'Tajawal',sans-serif;
+        box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:transform 0.15s,box-shadow 0.15s;
+      ">
+        <svg width="20" height="20" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        تسجيل الدخول بـ Google
+      </button>
+      <div id="login-error" style="color:#ef4444;font-size:13px;display:none;"></div>
+    `;
+    document.body.appendChild(screen);
+
+    document.getElementById('google-signin-btn').addEventListener('mouseenter', e => {
+      e.target.style.transform = 'translateY(-2px)';
+      e.target.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+    });
+    document.getElementById('google-signin-btn').addEventListener('mouseleave', e => {
+      e.target.style.transform = '';
+      e.target.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+    });
+  }
+
+  document.getElementById('login-screen').style.display = 'flex';
+
+  // زر تسجيل الدخول
+  document.getElementById('google-signin-btn').onclick = () => {
+    const btn = document.getElementById('google-signin-btn');
+    btn.textContent = '...جاري التحميل';
+    btn.disabled = true;
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).catch(e => {
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> تسجيل الدخول بـ Google`;
+      if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+        const err = document.getElementById('login-error');
+        err.textContent = '⚠️ فشل تسجيل الدخول، حاول مرة أخرى';
+        err.style.display = 'block';
+      }
+    });
+  };
+}
+
+function hideLoginScreen() {
+  const screen = document.getElementById('login-screen');
+  if (screen) screen.style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => p.style.display = '');
+  document.querySelector('.bottom-nav').style.display = '';
+  // أعد تفعيل الصفحة الصحيحة
+  window.switchPage(window.activePage || 'lib');
+}
+
+// ══ حفظ البيانات على Firestore ══
 async function saveToCloud(uid) {
   try {
     await setDoc(doc(db, "users", uid), {
-      items: window.items,
+      items:  window.items,
       nextId: window.nextId,
-      updatedAt: Date.now()
+      savedAt: Date.now()
     });
   } catch(e) {
-    console.error("خطأ في الحفظ:", e);
+    console.error("خطأ حفظ:", e);
     window.showToast("⚠️ فشل الحفظ على السحابة");
   }
 }
 
-// ── تحميل البيانات من Firestore والاستماع للتغييرات ──
-function listenToCloud(uid) {
-  // إيقاف الاستماع القديم إن وجد
-  if (unsubscribeSnapshot) unsubscribeSnapshot();
-
-  const ref = doc(db, "users", uid);
-  unsubscribeSnapshot = onSnapshot(ref, (snap) => {
+// ══ الاستماع الفوري لبيانات المستخدم ══
+function startListening(uid) {
+  if (unsubscribe) unsubscribe(); // أوقف المستمع القديم
+  unsubscribe = onSnapshot(doc(db, "users", uid), snap => {
     if (snap.exists()) {
       const data = snap.data();
       window.items  = data.items  || [];
-      window.nextId = data.nextId || (window.items.length ? Math.max(...window.items.map(i=>i.id),0)+1 : 1);
-      // حفظ نسخة محلية للعمل دون إنترنت
-      try { localStorage.setItem(window.SK, JSON.stringify(window.items)); } catch(e) {}
-      window.renderLib();
-      window.renderSocial();
+      window.nextId = data.nextId || (window.items.length ? Math.max(...window.items.map(i=>i.id), 0) + 1 : 1);
+    } else {
+      // حساب جديد — مكتبة فارغة
+      window.items  = [];
+      window.nextId = 1;
     }
+    window.renderLib();
+    window.renderSocial();
   });
 }
 
-// ── override دالة save لترسل للسحابة إذا كان المستخدم مسجلاً ──
-const _originalSave = window.save;
+// ══ override دالة الحفظ ══
 window.save = function() {
-  _originalSave(); // احفظ محلياً أولاً
   const user = auth.currentUser;
-  if (user) saveToCloud(user.uid);
+  if (!user) return; // لا تحفظ بدون حساب
+  saveToCloud(user.uid);
 };
 
-// ── تسجيل الدخول بـ Google ──
+// ══ تسجيل الدخول / الخروج ══
 window.handleLogin = function() {
   const user = auth.currentUser;
   if (user) {
     if (!confirm(`هل تريد تسجيل الخروج من حساب ${user.displayName}؟`)) return;
-    if (unsubscribeSnapshot) unsubscribeSnapshot();
-    signOut(auth).then(() => {
-      window.showToast("تم تسجيل الخروج");
-    }).catch(e => {
-      console.error(e);
-      window.showToast("⚠️ فشل تسجيل الخروج");
-    });
-  } else {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider).catch(e => {
-      console.error("Login error:", e.code, e.message);
-      if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
-        window.showToast("⚠️ " + (e.code || 'فشل تسجيل الدخول'));
-      }
-    });
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    signOut(auth);
   }
 };
 
-// ── مراقبة حالة المستخدم ──
-onAuthStateChanged(auth, (user) => {
+// ══ مراقبة حالة تسجيل الدخول ══
+onAuthStateChanged(auth, user => {
   if (user) {
-    // تحديث UI
-    const name = user.displayName || "مرحباً";
+    // ✅ مسجّل دخول
+    hideLoginScreen();
+
+    // تحديث زر الدخول في الـ header
+    const name = user.displayName || 'مرحباً';
     document.querySelectorAll('.login-text').forEach(el => el.textContent = name);
     document.querySelectorAll('.avatar').forEach(el => {
       if (user.photoURL) { el.src = user.photoURL; el.classList.add('show'); }
       else el.classList.remove('show');
     });
-    window.showToast(`مرحباً ${name} 👋`);
 
-    // ابدأ الاستماع للبيانات من السحابة
-    listenToCloud(user.uid);
+    // ابدأ الاستماع لبيانات هذا الحساب
+    startListening(user.uid);
   } else {
-    // تسجيل الخروج → أعد UI
-    document.querySelectorAll('.login-text').forEach(el => el.textContent = "تسجيل الدخول");
-    document.querySelectorAll('.avatar').forEach(el => { el.src=''; el.classList.remove('show'); });
-    if (unsubscribeSnapshot) { unsubscribeSnapshot(); unsubscribeSnapshot = null; }
-    // أعد تحميل البيانات المحلية
-    window.items = window._loadLocal();
-    window.renderLib();
-    window.renderSocial();
+    // ❌ غير مسجّل
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    window.items  = [];
+    window.nextId = 1;
+    showLoginScreen();
   }
 });
 </script>
