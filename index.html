@@ -1143,8 +1143,41 @@ window.handleLogin = function() {
   }
 };
 
+// ══ شاشة التحميل ══
+function showLoadingScreen() {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.querySelector('.bottom-nav').style.display = 'none';
+  const loginScreen = document.getElementById('login-screen');
+  if (loginScreen) loginScreen.style.display = 'none';
+
+  if (!document.getElementById('loading-screen')) {
+    const s = document.createElement('div');
+    s.id = 'loading-screen';
+    s.style.cssText = 'position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);z-index:9998;gap:16px;';
+    s.innerHTML = `
+      <div style="font-size:48px">📚</div>
+      <div style="color:var(--muted2);font-size:14px;font-family:Tajawal,sans-serif;">جاري التحميل...</div>
+      <div style="width:40px;height:4px;background:var(--surface3);border-radius:4px;overflow:hidden;">
+        <div style="height:100%;background:var(--accent);border-radius:4px;animation:loadbar 1.2s ease-in-out infinite;"></div>
+      </div>
+      <style>@keyframes loadbar{0%{width:0%;margin-left:0}50%{width:100%;margin-left:0}100%{width:0%;margin-left:100%}}</style>
+    `;
+    document.body.appendChild(s);
+  }
+  document.getElementById('loading-screen').style.display = 'flex';
+}
+
+function hideLoadingScreen() {
+  const s = document.getElementById('loading-screen');
+  if (s) s.style.display = 'none';
+}
+
 // ══ مراقبة حالة تسجيل الدخول ══
+// أظهر شاشة تحميل فوراً ريثما يتحقق Firebase من الحساب
+showLoadingScreen();
+
 onAuthStateChanged(auth, user => {
+  hideLoadingScreen();
   if (user) {
     // ✅ مسجّل دخول
     hideLoginScreen();
