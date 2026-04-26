@@ -313,6 +313,38 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   .field-row{grid-template-columns:1fr;}
   .nav-tab{padding:8px 12px;font-size:13px;}
 }
+
+/* ══ Settings Panel ══ */
+.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:500;display:none;}
+.settings-overlay.open{display:block;}
+.settings-panel{position:fixed;top:0;left:0;width:300px;max-width:90vw;height:100vh;background:var(--surface2);border-right:1px solid var(--border2);z-index:501;display:flex;flex-direction:column;gap:0;overflow-y:auto;transform:translateX(-100%);transition:transform 0.3s cubic-bezier(0.34,1.2,0.64,1);box-shadow:6px 0 30px rgba(0,0,0,0.4);}
+html[dir=rtl] .settings-panel{left:auto;right:0;border-right:none;border-left:1px solid var(--border2);transform:translateX(100%);}
+.settings-panel.open{transform:translateX(0);}
+.settings-header{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.2rem 1rem;border-bottom:1px solid var(--border);}
+.settings-title{font-family:"Cairo",sans-serif;font-size:17px;font-weight:900;}
+.settings-close{background:var(--surface3);border:1px solid var(--border2);color:var(--muted2);font-size:14px;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.settings-close:hover{color:var(--text);}
+.settings-section-label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:1rem 1.2rem 0.4rem;}
+.settings-item{display:flex;align-items:center;gap:10px;width:100%;padding:12px 1.2rem;border:none;background:transparent;color:var(--text);font-family:"Tajawal",sans-serif;font-size:14px;cursor:pointer;transition:background 0.12s;text-align:right;}
+.settings-item:hover{background:var(--surface3);}
+.settings-item-icon{font-size:17px;width:22px;text-align:center;flex-shrink:0;}
+.settings-item-text{flex:1;}
+.settings-item-arrow{color:var(--muted);font-size:18px;}
+.settings-user-info{display:flex;align-items:center;gap:11px;padding:10px 1.2rem 12px;margin:0 0.8rem;background:var(--surface3);border-radius:var(--radius-sm);border:1px solid var(--border2);}
+.settings-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.settings-user-name{font-size:14px;font-weight:700;color:var(--text);}
+.settings-user-email{font-size:11px;color:var(--muted2);margin-top:2px;}
+.switch-submenu{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);margin:0 0.8rem 4px;overflow:hidden;}
+.sub-item{padding:10px 1rem !important;}
+.sub-item:hover{background:var(--surface2) !important;}
+.saved-account-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 1rem;border:none;background:transparent;color:var(--text);font-family:"Tajawal",sans-serif;font-size:13px;cursor:pointer;transition:background 0.12s;text-align:right;border-top:1px solid var(--border);}
+.saved-account-btn:hover{background:var(--surface2);}
+.saved-account-btn img{width:26px;height:26px;border-radius:50%;object-fit:cover;}
+.saved-account-btn .acc-name{flex:1;}
+.saved-account-btn .acc-active{font-size:10px;color:var(--green);background:var(--green-bg);padding:2px 8px;border-radius:20px;}
+.settings-logout{color:var(--red) !important;margin-top:auto;border-top:1px solid var(--border);}
+.settings-logout:hover{background:var(--red-bg) !important;}
+.settings-gear-btn{position:relative;}
 </style>
 </head>
 <body>
@@ -330,12 +362,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </div>
     <div class="hero-right">
       <button class="icon-btn" onclick="openRandom()" title="اختار لي عشوائياً">🎲</button>
-      <button class="icon-btn" onclick="openStatsPage()" title="الإحصائيات">📊</button>
-      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="تبديل الوضع">🌙</button>
-      <button class="login-btn" id="login-btn" onclick="handleLogin()">
-        <img class="avatar" id="user-avatar" src="">
-        <span class="login-text" id="login-text">تسجيل الدخول</span>
-      </button>
+      <button class="icon-btn settings-gear-btn" onclick="openSettings()" title="الإعدادات">⚙️</button>
     </div>
   </div>
   <div class="toolbar">
@@ -352,7 +379,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </select>
     <button class="add-btn lib-add" onclick="openAdd(null,'lib')">+ إضافة</button>
   </div>
-  <div class="stats" id="lib-stats"></div>
+  <div class="stats" id="lib-stats" style="display:none"></div>
   <div class="cat-nav" id="lib-cat-nav"></div>
   <div id="lib-section"></div>
 </div>
@@ -368,11 +395,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       </div>
     </div>
     <div class="hero-right">
-      <button class="icon-btn" onclick="toggleTheme()" title="تبديل الوضع">🌙</button>
-      <button class="login-btn" id="login-btn-s" onclick="handleLogin()">
-        <img class="avatar" id="user-avatar-s" src="">
-        <span class="login-text" id="login-text-s">تسجيل الدخول</span>
-      </button>
+      <button class="icon-btn settings-gear-btn" onclick="openSettings()" title="الإعدادات">⚙️</button>
     </div>
   </div>
   <div class="toolbar">
@@ -387,7 +410,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     </select>
     <button class="add-btn social-add" onclick="openAdd(null,'social')">+ إضافة</button>
   </div>
-  <div class="stats" id="social-stats"></div>
+  <div class="stats" id="social-stats" style="display:none"></div>
   <div class="cat-nav" id="social-cat-nav"></div>
   <div id="social-section"></div>
 </div>
@@ -535,6 +558,56 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   </div>
 </div>
 
+<!-- ══ Settings Panel ══ -->
+<div class="settings-overlay" id="settings-overlay" onclick="closeSettings()"></div>
+<div class="settings-panel" id="settings-panel">
+  <div class="settings-header">
+    <div class="settings-title">⚙️ الإعدادات</div>
+    <button class="settings-close" onclick="closeSettings()">✕</button>
+  </div>
+
+  <div class="settings-section-label">العرض</div>
+  <button class="settings-item" onclick="openStatsPage();closeSettings()">
+    <span class="settings-item-icon">📊</span>
+    <span class="settings-item-text">الإحصائيات</span>
+    <span class="settings-item-arrow">›</span>
+  </button>
+  <button class="settings-item" onclick="toggleTheme()">
+    <span class="settings-item-icon" id="theme-settings-icon">🌙</span>
+    <span class="settings-item-text" id="theme-settings-text">الوضع الليلي</span>
+    <span class="settings-item-arrow">›</span>
+  </button>
+
+  <div class="settings-section-label">الحساب</div>
+  <div class="settings-user-info" id="settings-user-info" style="display:none">
+    <img class="settings-avatar" id="settings-avatar" src="">
+    <div class="settings-user-details">
+      <div class="settings-user-name" id="settings-user-name">—</div>
+      <div class="settings-user-email" id="settings-user-email">—</div>
+    </div>
+  </div>
+
+  <div class="settings-switch-wrap" id="settings-switch-wrap">
+    <button class="settings-item" onclick="toggleSwitchMenu()">
+      <span class="settings-item-icon">🔄</span>
+      <span class="settings-item-text">تبديل الحساب</span>
+      <span class="settings-item-arrow" id="switch-arrow">›</span>
+    </button>
+    <div class="switch-submenu" id="switch-submenu" style="display:none">
+      <button class="settings-item sub-item" onclick="addNewAccount()">
+        <span class="settings-item-icon">➕</span>
+        <span class="settings-item-text">إضافة حساب</span>
+      </button>
+      <div id="saved-accounts-list"></div>
+    </div>
+  </div>
+
+  <button class="settings-item settings-logout" onclick="handleLogout()">
+    <span class="settings-item-icon">🚪</span>
+    <span class="settings-item-text">تسجيل الخروج</span>
+  </button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -604,6 +677,9 @@ function toggleTheme(){
   isDark=!isDark;
   document.body.classList.toggle('light',!isDark);
   document.querySelectorAll('#theme-btn').forEach(b=>b.textContent=isDark?'🌙':'☀️');
+  const ti=document.getElementById('theme-settings-icon');const tt=document.getElementById('theme-settings-text');
+  if(ti)ti.textContent=isDark?'🌙':'☀️';
+  if(tt)tt.textContent=isDark?'الوضع الليلي':'الوضع النهاري';
   localStorage.setItem('mk_theme',isDark?'dark':'light');
 }
 (()=>{if(localStorage.getItem('mk_theme')==='light'){isDark=false;document.body.classList.add('light');document.querySelectorAll('#theme-btn').forEach(b=>b.textContent='☀️');}})();
@@ -977,6 +1053,106 @@ function showToast(msg){
   _toastTimer=setTimeout(()=>{t.classList.remove("show");_toastTimer=null;},2500);
 }
 
+
+// ══ SETTINGS PANEL ══
+let savedAccounts = JSON.parse(localStorage.getItem('mk_saved_accounts') || '{}');
+
+function openSettings(){
+  const user = window._firebaseAuth ? window._firebaseAuth.currentUser : null;
+  const userInfo = document.getElementById('settings-user-info');
+  const switchWrap = document.getElementById('settings-switch-wrap');
+  if(user){
+    const av=document.getElementById('settings-avatar');
+    av.src = user.photoURL || '';
+    av.style.display = user.photoURL ? 'block' : 'none';
+    document.getElementById('settings-user-name').textContent = user.displayName || 'مرحباً';
+    document.getElementById('settings-user-email').textContent = user.email || '';
+    userInfo.style.display = 'flex';
+    switchWrap.style.display = 'block';
+    if(user.uid){
+      savedAccounts[user.uid] = {name: user.displayName||'حساب', email: user.email||'', photo: user.photoURL||''};
+      localStorage.setItem('mk_saved_accounts', JSON.stringify(savedAccounts));
+    }
+  } else {
+    userInfo.style.display = 'none';
+    switchWrap.style.display = 'none';
+  }
+  const ti=document.getElementById('theme-settings-icon');
+  const tt=document.getElementById('theme-settings-text');
+  if(ti)ti.textContent=isDark?'🌙':'☀️';
+  if(tt)tt.textContent=isDark?'الوضع الليلي':'الوضع النهاري';
+  const sub = document.getElementById('switch-submenu');
+  if(sub) sub.style.display='none';
+  const arrow = document.getElementById('switch-arrow');
+  if(arrow) arrow.textContent='›';
+  document.getElementById('settings-overlay').classList.add('open');
+  document.getElementById('settings-panel').classList.add('open');
+}
+
+function closeSettings(){
+  document.getElementById('settings-overlay').classList.remove('open');
+  document.getElementById('settings-panel').classList.remove('open');
+}
+
+function toggleSwitchMenu(){
+  const sub = document.getElementById('switch-submenu');
+  const arrow = document.getElementById('switch-arrow');
+  const isOpen = sub.style.display !== 'none';
+  if(isOpen){
+    sub.style.display='none';
+    if(arrow) arrow.textContent='›';
+  } else {
+    const user = window._firebaseAuth ? window._firebaseAuth.currentUser : null;
+    const list = document.getElementById('saved-accounts-list');
+    let html = '';
+    for(const [uid, acc] of Object.entries(savedAccounts)){
+      const isCurrent = user && user.uid === uid;
+      const photoHtml = acc.photo ? '<img src="'+acc.photo+'" alt="">' : '<span style="font-size:20px">👤</span>';
+      const activeHtml = isCurrent ? '<span class="acc-active">نشط</span>' : '';
+      html += '<button class="saved-account-btn" onclick="switchToAccount(''+uid+'')">'+photoHtml+'<span class="acc-name">'+acc.name+'<br><span style="font-size:10px;color:var(--muted2)">'+acc.email+'</span></span>'+activeHtml+'</button>';
+    }
+    list.innerHTML = html || '<div style="padding:8px 1rem;font-size:12px;color:var(--muted)">لا توجد حسابات محفوظة</div>';
+    sub.style.display='block';
+    if(arrow) arrow.textContent='⌄';
+  }
+}
+
+async function switchToAccount(uid){
+  closeSettings();
+  const _auth = window._firebaseAuth;
+  const _so = window._signOut;
+  if(_auth && _so){
+    showToast('جارٍ تبديل الحساب...');
+    try { await _so(_auth); } catch(e) { console.error(e); }
+  }
+}
+
+function addNewAccount(){
+  closeSettings();
+  const _auth = window._firebaseAuth;
+  const _GAP = window._GoogleAuthProvider;
+  const _sip = window._signInWithPopup;
+  if(_auth && _GAP && _sip){
+    const provider = new _GAP();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    _sip(_auth, provider).catch(e => {
+      if(e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') showToast('فشل إضافة الحساب');
+    });
+  } else {
+    showToast('⚠️ الرجاء ربط Firebase أولاً');
+  }
+}
+
+function handleLogout(){
+  closeSettings();
+  const _auth = window._firebaseAuth;
+  if(_auth && _auth.currentUser){
+    const name = _auth.currentUser.displayName;
+    if(!confirm('هل تريد تسجيل الخروج من حساب ' + name + '؟')) return;
+    window._signOut(_auth);
+  }
+}
+
 // ══ EVENTS ══
 document.getElementById('lib-search').addEventListener('input',e=>{libSearch=e.target.value;renderLib();});
 document.getElementById('social-search').addEventListener('input',e=>{socialSearch=e.target.value;renderSocial();});
@@ -1132,6 +1308,12 @@ function startListening(uid) {
   });
 }
 
+// ══ نشر دوال Firebase عالمياً للإعدادات ══
+window._firebaseAuth = auth;
+window._signOut = signOut;
+window._GoogleAuthProvider = GoogleAuthProvider;
+window._signInWithPopup = signInWithPopup;
+
 // ══ ربط دالة الحفظ السحابي ══
 window._cloudSave = function() {
   const user = auth.currentUser;
@@ -1141,12 +1323,7 @@ window._cloudSave = function() {
 
 // ══ تسجيل الدخول / الخروج ══
 window.handleLogin = function() {
-  const user = auth.currentUser;
-  if (user) {
-    if (!confirm(`هل تريد تسجيل الخروج من حساب ${user.displayName}؟`)) return;
-    if (unsubscribe) { off(ref(db, "users/" + auth.currentUser?.uid)); unsubscribe = null; }
-    signOut(auth);
-  }
+  openSettings();
 };
 
 // ══ شاشة التحميل ══
@@ -1185,21 +1362,13 @@ showLoadingScreen();
 onAuthStateChanged(auth, user => {
   hideLoadingScreen();
   if (user) {
-    // ✅ مسجّل دخول
     hideLoginScreen();
-
-    // تحديث زر الدخول في الـ header
-    const name = user.displayName || 'مرحباً';
-    document.querySelectorAll('.login-text').forEach(el => el.textContent = name);
-    document.querySelectorAll('.avatar').forEach(el => {
-      if (user.photoURL) { el.src = user.photoURL; el.classList.add('show'); }
-      else el.classList.remove('show');
-    });
-
-    // ابدأ الاستماع لبيانات هذا الحساب
+    // Save to accounts list
+    const savedAcc = JSON.parse(localStorage.getItem('mk_saved_accounts') || '{}');
+    savedAcc[user.uid] = {name: user.displayName||'حساب', email: user.email||'', photo: user.photoURL||''};
+    localStorage.setItem('mk_saved_accounts', JSON.stringify(savedAcc));
     startListening(user.uid);
   } else {
-    // ❌ غير مسجّل
     if (unsubscribe) { unsubscribe = null; }
     window.items  = [];
     window.nextId = 1;
