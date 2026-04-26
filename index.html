@@ -581,8 +581,10 @@ function load(){
 }
 window._loadLocal=load;
 function save(){
-  try{localStorage.setItem(SK,JSON.stringify(window.items));}catch(e){showToast('⚠️ مساحة التخزين ممتلئة');}
-  
+  // إذا كانت دالة الحفظ السحابي جاهزة استخدمها، وإلا لا تحفظ شيء
+  if(typeof window._cloudSave === 'function'){
+    window._cloudSave();
+  }
 }
 
 window.items  = [];
@@ -986,7 +988,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeD
 window.renderLib=renderLib;
 window.renderSocial=renderSocial;
 window.showToast=showToast;
-window.save=save;
+
 renderLib();
 renderSocial();
 </script>
@@ -1097,14 +1099,17 @@ function hideLoginScreen() {
 // ══ حفظ البيانات على Firestore ══
 async function saveToCloud(uid) {
   try {
-    await setDoc(doc(db, "users", uid), {
-      items:  window.items,
-      nextId: window.nextId,
+    const payload = {
+      items:   JSON.parse(JSON.stringify(window.items)), // نسخة كاملة
+      nextId:  window.nextId,
       savedAt: Date.now()
-    });
+    };
+    console.log("💾 حفظ على السحابة:", payload.items.length, "عنصر");
+    await setDoc(doc(db, "users", uid), payload);
+    console.log("✅ تم الحفظ بنجاح");
   } catch(e) {
-    console.error("خطأ حفظ:", e);
-    window.showToast("⚠️ فشل الحفظ على السحابة");
+    console.error("❌ خطأ حفظ:", e);
+    window.showToast("⚠️ فشل الحفظ: " + e.message);
   }
 }
 
@@ -1126,10 +1131,10 @@ function startListening(uid) {
   });
 }
 
-// ══ override دالة الحفظ ══
-window.save = function() {
+// ══ ربط دالة الحفظ السحابي ══
+window._cloudSave = function() {
   const user = auth.currentUser;
-  if (!user) return; // لا تحفظ بدون حساب
+  if (!user) return;
   saveToCloud(user.uid);
 };
 
