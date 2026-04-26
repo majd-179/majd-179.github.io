@@ -358,7 +358,21 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .saved-account-btn .acc-active{font-size:10px;color:var(--green);background:var(--green-bg);padding:2px 8px;border-radius:20px;}
 .settings-logout{color:var(--red) !important;margin-top:auto;border-top:1px solid var(--border);}
 .settings-logout:hover{background:var(--red-bg) !important;}
-.settings-gear-btn{position:relative;}
+.hero-logo-btn{
+  display:flex;align-items:center;gap:14px;
+  background:transparent;border:none;cursor:pointer;
+  padding:6px 10px 6px 6px;
+  border-radius:var(--radius-sm);
+  transition:background 0.18s, transform 0.18s;
+  text-align:right;
+}
+.hero-logo-btn:hover{
+  background:var(--surface2);
+  transform:scale(1.02);
+}
+.hero-logo-btn:active{transform:scale(0.98);}
+.hero-logo-btn .hero-title,
+.hero-logo-btn .hero-sub{pointer-events:none;}
 
 /* ══ Profile Page ══ */
 @keyframes profileSlideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
@@ -536,16 +550,15 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <!-- ══════════ PAGE: LIBRARY ══════════ -->
 <div class="page active" id="page-lib">
   <div class="hero">
-    <div class="hero-left">
+    <button class="hero-left hero-logo-btn" data-action="openSettings" title="الإعدادات">
       <div class="hero-icon lib-icon">📚</div>
       <div>
         <div class="hero-title">المكتبة</div>
         <div class="hero-sub">أنمي · مانغا · كتب · ألعاب · أفلام · مسلسلات</div>
       </div>
-    </div>
+    </button>
     <div class="hero-right">
       <button class="icon-btn" onclick="openRandom()" title="اختار لي عشوائياً">🎲</button>
-      <button class="icon-btn settings-gear-btn" data-action="openSettings" title="الإعدادات">⚙️</button>
     </div>
   </div>
   <div class="toolbar">
@@ -570,15 +583,14 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 <!-- ══════════ PAGE: SOCIAL ══════════ -->
 <div class="page" id="page-social">
   <div class="hero">
-    <div class="hero-left">
+    <button class="hero-left hero-logo-btn" data-action="openSettings" title="الإعدادات">
       <div class="hero-icon social-icon">🎵</div>
       <div>
         <div class="hero-title social-title">وسائل التواصل</div>
         <div class="hero-sub">موسيقى · يوتيوب · انستغرام</div>
       </div>
-    </div>
+    </button>
     <div class="hero-right">
-      <button class="icon-btn settings-gear-btn" data-action="openSettings" title="الإعدادات">⚙️</button>
     </div>
   </div>
   <div class="toolbar">
