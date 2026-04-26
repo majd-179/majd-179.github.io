@@ -999,8 +999,8 @@ renderSocial();
 import { initializeApp }                              from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
                                                       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, onSnapshot, getDoc }
-                                                      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getDatabase, ref, set, onValue, off }
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // ══ إعداد Firebase ══
 const firebaseConfig = {
@@ -1009,11 +1009,12 @@ const firebaseConfig = {
   projectId: "my-library-179",
   storageBucket: "my-library-179.firebasestorage.app",
   messagingSenderId: "447037989932",
-  appId: "1:447037989932:web:fe28b970ff4d3b14e49d89"
+  appId: "1:447037989932:web:fe28b970ff4d3b14e49d89",
+  databaseURL: "https://my-library-179-default-rtdb.europe-west1.firebasedatabase.app"
 };
 const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db   = getFirestore(app);
+const db   = getDatabase(app);
 
 let unsubscribe = null; // مستمع Firestore الحالي
 
@@ -1100,12 +1101,12 @@ function hideLoginScreen() {
 async function saveToCloud(uid) {
   try {
     const payload = {
-      items:   JSON.parse(JSON.stringify(window.items)), // نسخة كاملة
+      items:   JSON.parse(JSON.stringify(window.items)),
       nextId:  window.nextId,
       savedAt: Date.now()
     };
     console.log("💾 حفظ على السحابة:", payload.items.length, "عنصر");
-    await setDoc(doc(db, "users", uid), payload);
+    await set(ref(db, "users/" + uid), payload);
     console.log("✅ تم الحفظ بنجاح");
   } catch(e) {
     console.error("❌ خطأ حفظ:", e);
@@ -1115,14 +1116,14 @@ async function saveToCloud(uid) {
 
 // ══ الاستماع الفوري لبيانات المستخدم ══
 function startListening(uid) {
-  if (unsubscribe) unsubscribe(); // أوقف المستمع القديم
-  unsubscribe = onSnapshot(doc(db, "users", uid), snap => {
+  if (unsubscribe) { off(ref(db, "users/" + uid)); unsubscribe = null; }
+  const userRef = ref(db, "users/" + uid);
+  unsubscribe = onValue(userRef, snap => {
     if (snap.exists()) {
-      const data = snap.data();
+      const data = snap.val();
       window.items  = data.items  || [];
       window.nextId = data.nextId || (window.items.length ? Math.max(...window.items.map(i=>i.id), 0) + 1 : 1);
     } else {
-      // حساب جديد — مكتبة فارغة
       window.items  = [];
       window.nextId = 1;
     }
@@ -1143,7 +1144,7 @@ window.handleLogin = function() {
   const user = auth.currentUser;
   if (user) {
     if (!confirm(`هل تريد تسجيل الخروج من حساب ${user.displayName}؟`)) return;
-    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    if (unsubscribe) { off(ref(db, "users/" + auth.currentUser?.uid)); unsubscribe = null; }
     signOut(auth);
   }
 };
@@ -1199,7 +1200,7 @@ onAuthStateChanged(auth, user => {
     startListening(user.uid);
   } else {
     // ❌ غير مسجّل
-    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    if (unsubscribe) { unsubscribe = null; }
     window.items  = [];
     window.nextId = 1;
     showLoginScreen();
