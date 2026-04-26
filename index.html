@@ -359,6 +359,41 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .settings-logout{color:var(--red) !important;margin-top:auto;border-top:1px solid var(--border);}
 .settings-logout:hover{background:var(--red-bg) !important;}
 .settings-gear-btn{position:relative;}
+
+/* ══ Profile Page ══ */
+.profile-page{display:none;position:fixed;inset:0;background:var(--bg);z-index:150;overflow-y:auto;}
+.profile-page.open{display:block;}
+.profile-inner{max-width:500px;margin:0 auto;padding:2rem 1.25rem 6rem;}
+.profile-back-header{display:flex;align-items:center;gap:12px;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);}
+.profile-back{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Tajawal',sans-serif;font-size:14px;padding:8px 16px;cursor:pointer;transition:background 0.15s;}
+.profile-back:hover{background:var(--surface3);}
+.profile-back-title{font-family:'Cairo',sans-serif;font-size:20px;font-weight:900;}
+
+.profile-hero{display:flex;flex-direction:column;align-items:center;gap:12px;padding:2rem 1rem 2.5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.25rem;position:relative;overflow:hidden;}
+.profile-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(127,119,221,0.08),rgba(168,85,247,0.05));pointer-events:none;}
+.profile-avatar-wrap{position:relative;}
+.profile-avatar{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid rgba(127,119,221,0.4);box-shadow:0 0 25px rgba(127,119,221,0.25);display:block;}
+.profile-avatar-placeholder{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:38px;border:3px solid rgba(127,119,221,0.4);box-shadow:0 0 25px rgba(127,119,221,0.25);}
+.profile-online-dot{position:absolute;bottom:5px;right:5px;width:14px;height:14px;border-radius:50%;background:var(--green);border:2.5px solid var(--bg);box-shadow:0 0 6px var(--green);}
+.profile-name{font-family:'Cairo',sans-serif;font-size:22px;font-weight:900;color:var(--text);text-align:center;}
+.profile-email{font-size:13px;color:var(--muted2);text-align:center;}
+.profile-provider-badge{display:flex;align-items:center;gap:6px;background:var(--surface3);border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text2);font-weight:600;margin-top:4px;}
+
+.profile-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.25rem;overflow:hidden;}
+.profile-section-title{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:1rem 1.2rem 0.5rem;}
+.profile-row{display:flex;align-items:center;gap:12px;padding:13px 1.2rem;border-top:1px solid var(--border);}
+.profile-row:first-of-type{border-top:none;}
+.profile-row-icon{font-size:18px;width:24px;text-align:center;flex-shrink:0;}
+.profile-row-label{font-size:12px;color:var(--muted2);margin-bottom:2px;}
+.profile-row-val{font-size:14px;font-weight:600;color:var(--text);}
+
+.profile-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:1rem;}
+.profile-stat{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;}
+.profile-stat-num{font-family:'Cairo',sans-serif;font-size:24px;font-weight:900;background:linear-gradient(135deg,var(--text),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.profile-stat-lbl{font-size:10px;color:var(--muted);margin-top:3px;}
+
+.profile-logout-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border:none;border-radius:var(--radius);background:var(--red-bg);color:var(--red);font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;border:1px solid rgba(239,68,68,0.2);}
+.profile-logout-btn:hover{background:rgba(239,68,68,0.2);}
 </style>
 </head>
 <body>
@@ -572,6 +607,88 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   </div>
 </div>
 
+<!-- ══ Profile Page ══ -->
+<div class="profile-page" id="profile-page">
+  <div class="profile-inner">
+    <div class="profile-back-header">
+      <button class="profile-back" onclick="closeProfilePage()">← رجوع</button>
+      <div class="profile-back-title">👤 الملف الشخصي</div>
+    </div>
+
+    <!-- بطاقة الهيرو -->
+    <div class="profile-hero">
+      <div class="profile-avatar-wrap">
+        <div id="profile-avatar-area">
+          <div class="profile-avatar-placeholder">👤</div>
+        </div>
+        <div class="profile-online-dot"></div>
+      </div>
+      <div class="profile-name" id="profile-name">—</div>
+      <div class="profile-email" id="profile-email">—</div>
+      <div class="profile-provider-badge">
+        <span>🔵</span><span>Google Account</span>
+      </div>
+    </div>
+
+    <!-- إحصائيات المكتبة -->
+    <div class="profile-section">
+      <div class="profile-section-title">إحصائيات المكتبة</div>
+      <div class="profile-stats-grid">
+        <div class="profile-stat">
+          <div class="profile-stat-num" id="pstat-total">0</div>
+          <div class="profile-stat-lbl">إجمالي</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-num" id="pstat-done">0</div>
+          <div class="profile-stat-lbl">✅ أتممته</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-num" id="pstat-watching">0</div>
+          <div class="profile-stat-lbl">⏳ جارٍ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- معلومات الحساب -->
+    <div class="profile-section">
+      <div class="profile-section-title">معلومات الحساب</div>
+      <div class="profile-row">
+        <span class="profile-row-icon">👤</span>
+        <div>
+          <div class="profile-row-label">الاسم</div>
+          <div class="profile-row-val" id="profile-info-name">—</div>
+        </div>
+      </div>
+      <div class="profile-row">
+        <span class="profile-row-icon">📧</span>
+        <div>
+          <div class="profile-row-label">البريد الإلكتروني</div>
+          <div class="profile-row-val" id="profile-info-email">—</div>
+        </div>
+      </div>
+      <div class="profile-row">
+        <span class="profile-row-icon">🔐</span>
+        <div>
+          <div class="profile-row-label">مزوّد الدخول</div>
+          <div class="profile-row-val">Google</div>
+        </div>
+      </div>
+      <div class="profile-row">
+        <span class="profile-row-icon">📅</span>
+        <div>
+          <div class="profile-row-label">تاريخ الانضمام</div>
+          <div class="profile-row-val" id="profile-joined">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- زر تسجيل الخروج -->
+    <button class="profile-logout-btn" id="profile-logout-btn">
+      🚪 تسجيل الخروج
+    </button>
+  </div>
+</div>
+
 <!-- ══ Settings Panel ══ -->
 <div class="settings-overlay" id="settings-overlay"></div>
 <div class="settings-panel" id="settings-panel">
@@ -579,6 +696,17 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="settings-title">⚙️ الإعدادات</div>
     <button class="settings-close" id="settings-close-btn">✕</button>
   </div>
+
+  <!-- الملف الشخصي — أول خيار -->
+  <div class="settings-section-label">الملف الشخصي</div>
+  <button class="settings-item" id="settings-profile-btn">
+    <span class="settings-item-icon" id="settings-profile-icon-wrap">
+      <img id="settings-profile-avatar" src="" style="width:26px;height:26px;border-radius:50%;object-fit:cover;display:none;vertical-align:middle;">
+      <span id="settings-profile-icon-fallback">👤</span>
+    </span>
+    <span class="settings-item-text" id="settings-profile-name">الملف الشخصي</span>
+    <span class="settings-item-arrow">›</span>
+  </button>
 
   <div class="settings-section-label">العرض</div>
   <button class="settings-item" id="settings-stats-btn">
@@ -1389,6 +1517,78 @@ function handleLogoutFn() {
   }
 }
 
+// ══ PROFILE PAGE ══
+function openProfilePage() {
+  closeSettingsFn();
+  const user = auth.currentUser;
+  const page = document.getElementById('profile-page');
+
+  if (user) {
+    // صورة المستخدم
+    const avatarArea = document.getElementById('profile-avatar-area');
+    if (user.photoURL) {
+      avatarArea.innerHTML = `<img class="profile-avatar" src="${user.photoURL}" onerror="this.style.display='none'">`;
+    } else {
+      avatarArea.innerHTML = `<div class="profile-avatar-placeholder">👤</div>`;
+    }
+
+    // الاسم والإيميل
+    const displayName = user.displayName || 'مستخدم';
+    const email = user.email || '—';
+    document.getElementById('profile-name').textContent = displayName;
+    document.getElementById('profile-email').textContent = email;
+    document.getElementById('profile-info-name').textContent = displayName;
+    document.getElementById('profile-info-email').textContent = email;
+
+    // تاريخ الانضمام
+    const joinDate = user.metadata?.creationTime
+      ? new Date(user.metadata.creationTime).toLocaleDateString('ar-SA', {year:'numeric',month:'long',day:'numeric'})
+      : '—';
+    document.getElementById('profile-joined').textContent = joinDate;
+  } else {
+    document.getElementById('profile-avatar-area').innerHTML = `<div class="profile-avatar-placeholder">👤</div>`;
+    document.getElementById('profile-name').textContent = 'غير مسجّل';
+    document.getElementById('profile-email').textContent = '—';
+    document.getElementById('profile-info-name').textContent = '—';
+    document.getElementById('profile-info-email').textContent = '—';
+    document.getElementById('profile-joined').textContent = '—';
+  }
+
+  // إحصائيات
+  const all = window.items || [];
+  document.getElementById('pstat-total').textContent = all.length;
+  document.getElementById('pstat-done').textContent = all.filter(i=>i.status==='completed').length;
+  document.getElementById('pstat-watching').textContent = all.filter(i=>i.status==='watching').length;
+
+  page.classList.add('open');
+}
+
+function closeProfilePage() {
+  document.getElementById('profile-page').classList.remove('open');
+}
+
+function updateSettingsProfileSnippet(user) {
+  const avatarImg = document.getElementById('settings-profile-avatar');
+  const fallback = document.getElementById('settings-profile-icon-fallback');
+  const nameEl = document.getElementById('settings-profile-name');
+  if (user && user.photoURL) {
+    avatarImg.src = user.photoURL;
+    avatarImg.style.display = 'inline-block';
+    if(fallback) fallback.style.display = 'none';
+  } else {
+    avatarImg.style.display = 'none';
+    if(fallback) fallback.style.display = 'inline';
+  }
+  if (nameEl) nameEl.textContent = user ? (user.displayName || 'الملف الشخصي') : 'الملف الشخصي';
+}
+
+// ربط زر الملف الشخصي
+document.getElementById('settings-profile-btn').addEventListener('click', openProfilePage);
+document.getElementById('profile-logout-btn').addEventListener('click', () => {
+  closeProfilePage();
+  handleLogoutFn();
+});
+
 // استدعي الربط فوراً
 bindSettingsButtons();
 
@@ -1445,11 +1645,13 @@ onAuthStateChanged(auth, user => {
     const savedAcc = JSON.parse(localStorage.getItem('mk_saved_accounts') || '{}');
     savedAcc[user.uid] = {name: user.displayName||'حساب', email: user.email||'', photo: user.photoURL||''};
     localStorage.setItem('mk_saved_accounts', JSON.stringify(savedAcc));
+    updateSettingsProfileSnippet(user);
     startListening(user.uid);
   } else {
     if (unsubscribe) { unsubscribe = null; }
     window.items  = [];
     window.nextId = 1;
+    updateSettingsProfileSnippet(null);
     showLoginScreen();
   }
 });
