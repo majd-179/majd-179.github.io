@@ -1346,8 +1346,27 @@ function toggleSwitchMenuFn() {
 
 async function switchToAccountFn(uid) {
   closeSettingsFn();
+  // إذا نفس الحساب الحالي ما تسوي شيء
+  if(auth.currentUser && auth.currentUser.uid === uid) {
+    window.showToast('أنت مسجّل دخول بهذا الحساب بالفعل');
+    return;
+  }
+  const accInfo = savedAccounts[uid];
   window.showToast('جارٍ تبديل الحساب...');
-  try { await signOut(auth); } catch(e) { console.error(e); }
+  try {
+    // سجّل خروج من الحساب الحالي
+    if(unsubscribe){ try{ off(ref(db,'users/'+auth.currentUser?.uid)); }catch(e){} unsubscribe=null; }
+    await signOut(auth);
+    // سجّل دخول مباشرة بالحساب المختار
+    const provider = new GoogleAuthProvider();
+    // login_hint يجبر Google يختار الحساب مباشرة بدون اختيار
+    if(accInfo?.email) provider.setCustomParameters({ login_hint: accInfo.email });
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    if(e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+      window.showToast('فشل تبديل الحساب');
+    }
+  }
 }
 
 function addNewAccountFn() {
