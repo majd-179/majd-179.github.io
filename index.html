@@ -1107,11 +1107,11 @@ function toggleSwitchMenu(){
     let html = '';
     for(const [uid, acc] of Object.entries(savedAccounts)){
       const isCurrent = user && user.uid === uid;
-      const photoHtml = acc.photo ? '<img src="'+acc.photo+'" alt="">' : '<span style="font-size:20px">👤</span>';
-      const activeHtml = isCurrent ? '<span class="acc-active">نشط</span>' : '';
-      html += '<button class="saved-account-btn" onclick="switchToAccount(''+uid+'')">'+photoHtml+'<span class="acc-name">'+acc.name+'<br><span style="font-size:10px;color:var(--muted2)">'+acc.email+'</span></span>'+activeHtml+'</button>';
+      const photoHtml = acc.photo ? `<img src="${acc.photo}" alt="">` : `<span style="font-size:20px">👤</span>`;
+      const activeHtml = isCurrent ? `<span class="acc-active">نشط</span>` : '';
+      html += `<button class="saved-account-btn" onclick="switchToAccount('${uid}')">${photoHtml}<span class="acc-name">${acc.name}<br><span style="font-size:10px;color:var(--muted2)">${acc.email}</span></span>${activeHtml}</button>`;
     }
-    list.innerHTML = html || '<div style="padding:8px 1rem;font-size:12px;color:var(--muted)">لا توجد حسابات محفوظة</div>';
+    list.innerHTML = html || `<div style="padding:8px 1rem;font-size:12px;color:var(--muted)">لا توجد حسابات محفوظة</div>`;
     sub.style.display='block';
     if(arrow) arrow.textContent='⌄';
   }
@@ -1164,6 +1164,36 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeD
 window.renderLib=renderLib;
 window.renderSocial=renderSocial;
 window.showToast=showToast;
+window.switchPage=switchPage;
+window.openSettings=openSettings;
+window.closeSettings=closeSettings;
+window.toggleSwitchMenu=toggleSwitchMenu;
+window.switchToAccount=switchToAccount;
+window.addNewAccount=addNewAccount;
+window.handleLogout=handleLogout;
+window.toggleTheme=toggleTheme;
+window.openStatsPage=openStatsPage;
+window.closeStatsPage=closeStatsPage;
+window.openRandom=openRandom;
+window.closeRandom=closeRandom;
+window.spinRandom=spinRandom;
+window.setRandomCat=setRandomCat;
+window.openAdd=openAdd;
+window.openEdit=openEdit;
+window.closeModal=closeModal;
+window.saveItem=saveItem;
+window.deleteItem=deleteItem;
+window.openDetail=openDetail;
+window.closeDetail=closeDetail;
+window.setLibCat=setLibCat;
+window.setSocialCat=setSocialCat;
+window.setLibStatus=setLibStatus;
+window.onCatChange=onCatChange;
+window.triggerFileInput=triggerFileInput;
+window.handleFileInput=handleFileInput;
+window.removeImage=removeImage;
+window.toggleMenu=toggleMenu;
+window.activePage=activePage;
 
 renderLib();
 renderSocial();
