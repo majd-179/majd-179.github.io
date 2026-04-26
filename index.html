@@ -982,7 +982,14 @@ function spinRandom(){
     </div>`;
 }
 
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+let _toastTimer=null;
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.classList.add("show");
+  if(_toastTimer)clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>{t.classList.remove("show");_toastTimer=null;},2500);
+}
 
 // ══ EVENTS ══
 document.getElementById('lib-search').addEventListener('input',e=>{libSearch=e.target.value;renderLib();});
@@ -1067,23 +1074,25 @@ window.save = function() {
 };
 
 // ── تسجيل الدخول بـ Google ──
-window.handleLogin = async function() {
+window.handleLogin = function() {
   const user = auth.currentUser;
   if (user) {
-    // مسجّل → خروج
     if (!confirm(`هل تريد تسجيل الخروج من حساب ${user.displayName}؟`)) return;
     if (unsubscribeSnapshot) unsubscribeSnapshot();
-    await signOut(auth);
-    window.showToast("تم تسجيل الخروج");
-  } else {
-    // غير مسجّل → دخول
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch(e) {
+    signOut(auth).then(() => {
+      window.showToast("تم تسجيل الخروج");
+    }).catch(e => {
       console.error(e);
-      window.showToast("⚠️ فشل تسجيل الدخول");
-    }
+      window.showToast("⚠️ فشل تسجيل الخروج");
+    });
+  } else {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).catch(e => {
+      console.error("Login error:", e.code, e.message);
+      if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+        window.showToast("⚠️ " + (e.code || 'فشل تسجيل الدخول'));
+      }
+    });
   }
 };
 
