@@ -702,19 +702,158 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .rating-stars{flex:1;display:flex;gap:3px;align-items:center;}
 .star-fill{font-size:13px;line-height:1;}
 .rating-val{font-size:12px;font-weight:700;color:#fbbf24;min-width:30px;text-align:left;}
-.random-wrap{text-align:center;padding:2rem 1rem;}
-.random-spin-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:var(--radius);padding:16px 40px;font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.4,0.64,1);box-shadow:0 6px 24px rgba(139,131,240,0.45);margin-bottom:2rem;letter-spacing:0.3px;}
-.random-spin-btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 36px rgba(139,131,240,0.55);}
-.random-result{background:linear-gradient(145deg,var(--surface),var(--surface2));border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;max-width:280px;margin:0 auto;animation:cardIn 0.4s cubic-bezier(0.34,1.56,0.64,1);}
-.random-result img{width:100%;height:200px;object-fit:cover;}
-.random-result-placeholder{width:100%;height:175px;display:flex;align-items:center;justify-content:center;font-size:58px;background:linear-gradient(135deg,var(--surface2),var(--surface3));}
-.random-result-body{padding:1.2rem;}
-.random-result-name{font-family:'Cairo',sans-serif;font-size:19px;font-weight:900;margin-bottom:6px;}
-.random-result-cat{font-size:12px;color:var(--muted);}
-.random-empty{color:var(--muted);font-size:14px;padding:2rem;}
-.random-filter{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-bottom:1.5rem;}
-.random-filter-btn{padding:7px 15px;border-radius:20px;font-family:'Tajawal',sans-serif;font-size:13px;border:1px solid var(--border2);background:var(--glass);color:var(--muted2);cursor:pointer;transition:all 0.2s;backdrop-filter:blur(6px);}
-.random-filter-btn.active{background:var(--surface3);color:var(--text);border-color:var(--border3);font-weight:700;}
+/* ══ Random Page — premium redesign ══ */
+@keyframes diceRoll{
+  0%  {transform:rotate(0deg)   scale(1);}
+  20% {transform:rotate(-18deg) scale(1.15);}
+  45% {transform:rotate(22deg)  scale(1.2);}
+  65% {transform:rotate(-12deg) scale(1.1);}
+  80% {transform:rotate(8deg)   scale(1.05);}
+  100%{transform:rotate(0deg)   scale(1);}
+}
+@keyframes resultReveal{
+  0%  {opacity:0;transform:translateY(28px) scale(0.94);}
+  60% {opacity:1;transform:translateY(-6px) scale(1.02);}
+  100%{opacity:1;transform:translateY(0)    scale(1);}
+}
+@keyframes shimmerSweep{
+  0%  {background-position:-200% center;}
+  100%{background-position:200% center;}
+}
+@keyframes pulse-ring{
+  0%  {transform:scale(1);   opacity:0.6;}
+  100%{transform:scale(1.55);opacity:0;}
+}
+
+.random-wrap{padding:0.5rem 0 2rem;}
+
+/* ── فلاتر متعددة الاختيار ── */
+.random-filter-label{
+  font-size:11px;font-weight:800;color:var(--muted2);
+  text-transform:uppercase;letter-spacing:0.8px;
+  margin-bottom:0.8rem;
+  display:flex;align-items:center;gap:6px;
+}
+.random-filter-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border2),transparent);}
+.random-filter{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:1.6rem;}
+.random-filter-btn{
+  padding:8px 15px;border-radius:20px;
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;
+  border:1.5px solid var(--border2);background:var(--glass);color:var(--muted2);
+  cursor:pointer;
+  transition:background 0.2s,border-color 0.2s,color 0.2s,transform 0.18s,box-shadow 0.2s;
+  backdrop-filter:blur(6px);
+  display:flex;align-items:center;gap:6px;
+}
+.random-filter-btn:hover{color:var(--text);transform:translateY(-1px);}
+.random-filter-btn.active{
+  color:#fff;border-color:transparent;
+  background:var(--filter-color, var(--accent));
+  box-shadow:0 4px 14px var(--filter-glow, var(--accent-glow));
+  transform:translateY(-1px);
+}
+.random-filter-btn .f-cnt{
+  font-size:10px;background:rgba(255,255,255,0.22);
+  padding:1px 6px;border-radius:12px;font-weight:700;
+}
+.random-filter-btn:not(.active) .f-cnt{background:rgba(139,131,240,0.1);color:var(--muted2);}
+
+/* ── مقياس الحالة ── */
+.random-status-filter{
+  display:flex;gap:6px;margin-bottom:1.8rem;flex-wrap:wrap;
+}
+.status-pill{
+  padding:7px 16px;border-radius:20px;
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;
+  border:1.5px solid var(--border2);background:transparent;color:var(--muted2);
+  cursor:pointer;transition:all 0.2s;
+}
+.status-pill.active{background:var(--surface3);color:var(--text);border-color:var(--border3);}
+.status-pill:hover{color:var(--text);}
+
+/* ── زر العجلة ── */
+.random-spin-area{
+  display:flex;flex-direction:column;align-items:center;
+  margin-bottom:2rem;gap:1rem;
+}
+.random-dice-btn{
+  position:relative;
+  width:90px;height:90px;
+  border-radius:26px;
+  background:linear-gradient(145deg,var(--accent),var(--accent2));
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:42px;
+  box-shadow:0 8px 32px rgba(139,131,240,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition:box-shadow 0.25s ease;
+}
+.random-dice-btn:hover{box-shadow:0 12px 40px rgba(139,131,240,0.6), inset 0 1px 0 rgba(255,255,255,0.2);}
+.random-dice-btn.rolling .dice-icon{animation:diceRoll 0.55s cubic-bezier(0.34,1.3,0.64,1);}
+/* حلقات نبض خلف الزر */
+.random-dice-btn::before,.random-dice-btn::after{
+  content:'';position:absolute;inset:-8px;
+  border-radius:34px;
+  border:2px solid rgba(139,131,240,0.35);
+  animation:pulse-ring 2s ease-out infinite;
+  pointer-events:none;
+}
+.random-dice-btn::after{animation-delay:1s;inset:-14px;border-radius:40px;}
+.dice-icon{font-size:42px;line-height:1;position:relative;z-index:1;display:block;}
+.random-spin-lbl{
+  font-family:'Cairo',sans-serif;font-size:16px;font-weight:900;
+  color:var(--text2);letter-spacing:0.3px;
+}
+.random-pool-count{
+  font-size:11px;color:var(--muted);
+  background:var(--glass2);border:1px solid var(--border);
+  padding:4px 14px;border-radius:20px;
+}
+
+/* ── النتيجة ── */
+.random-result{
+  background:linear-gradient(145deg,var(--surface),var(--surface2));
+  border:1px solid var(--border2);border-radius:var(--radius);
+  overflow:hidden;max-width:300px;margin:0 auto;
+  animation:resultReveal 0.45s cubic-bezier(0.34,1.2,0.64,1) both;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+}
+.random-result img{width:100%;height:210px;object-fit:cover;display:block;}
+.random-result-placeholder{
+  width:100%;height:175px;
+  display:flex;align-items:center;justify-content:center;font-size:64px;
+  background:linear-gradient(135deg,var(--surface2),var(--surface3));
+}
+.random-result-body{padding:1.3rem;}
+.random-result-name{
+  font-family:'Cairo',sans-serif;font-size:20px;font-weight:900;
+  margin-bottom:8px;line-height:1.3;
+}
+.random-result-cat{
+  font-size:12px;color:var(--muted);
+  display:flex;align-items:center;gap:5px;margin-bottom:8px;
+}
+.random-result-actions{display:flex;gap:8px;margin-top:12px;}
+.random-again-btn{
+  flex:1;padding:10px;border-radius:12px;border:1.5px solid var(--border2);
+  background:var(--glass2);color:var(--text2);
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;
+}
+.random-again-btn:hover{background:var(--surface3);border-color:var(--border3);}
+.random-open-btn{
+  flex:1;padding:10px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;
+  box-shadow:0 4px 14px rgba(139,131,240,0.35);
+}
+.random-open-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(139,131,240,0.5);}
+
+.random-empty{
+  text-align:center;padding:3rem 1rem;
+  color:var(--muted);font-size:14px;line-height:2.2;
+}
+.random-empty-icon{font-size:52px;display:block;margin-bottom:0.5rem;opacity:0.6;}
 
 /* ══ Login Button ══ */
 .login-btn{display:flex;align-items:center;gap:8px;background:var(--glass2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;padding:8px 15px;cursor:pointer;transition:all 0.2s;white-space:nowrap;backdrop-filter:blur(8px);}
@@ -1216,8 +1355,23 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
       <div class="fullpage-title">🎲 ماذا أشاهد؟</div>
     </div>
     <div class="random-wrap">
+      <!-- فلاتر الفئات — متعددة الاختيار -->
+      <div class="random-filter-label">الأقسام</div>
       <div class="random-filter" id="random-filter"></div>
-      <button class="random-spin-btn" onclick="spinRandom()">🎲 اختار لي!</button>
+
+      <!-- فلتر الحالة -->
+      <div class="random-filter-label">الحالة</div>
+      <div class="random-status-filter" id="random-status-filter"></div>
+
+      <!-- زر العجلة -->
+      <div class="random-spin-area">
+        <button class="random-dice-btn" id="random-dice-btn" onclick="spinRandom()">
+          <span class="dice-icon">🎲</span>
+        </button>
+        <div class="random-spin-lbl">اختار لي!</div>
+        <div class="random-pool-count" id="random-pool-count">...</div>
+      </div>
+
       <div id="random-result"></div>
     </div>
   </div>
@@ -1927,26 +2081,134 @@ function openStatsPage(){
 function closeStatsPage(){document.getElementById('stats-page').classList.remove('open');}
 
 // ══ RANDOM ══
-function openRandom(){randomCat='الكل';renderRandomFilter();document.getElementById('random-result').innerHTML='';document.getElementById('random-page').classList.add('open');}
-function closeRandom(){document.getElementById('random-page').classList.remove('open');}
-function renderRandomFilter(){
-  document.getElementById('random-filter').innerHTML=['الكل',...LIB_CATS.map(c=>c.id)].map(f=>`
-    <button class="random-filter-btn${randomCat===f?' active':''}" onclick="setRandomCat('${f}')">${f}</button>`).join('');
+// ══ RANDOM PAGE ══
+let randomSelectedCats = new Set(['الكل']); // multi-select
+let randomStatus = 'planned'; // planned | watching | الكل
+
+function openRandom(){
+  randomSelectedCats = new Set(['الكل']);
+  randomStatus = 'planned';
+  renderRandomFilter();
+  renderRandomStatusFilter();
+  updateRandomPoolCount();
+  document.getElementById('random-result').innerHTML = '';
+  document.getElementById('random-page').classList.add('open');
 }
-function setRandomCat(c){randomCat=c;renderRandomFilter();document.getElementById('random-result').innerHTML='';}
+function closeRandom(){document.getElementById('random-page').classList.remove('open');}
+
+function getRandomPool(){
+  let pool = window.items.filter(i => isLib(i.cat));
+  // فلتر الحالة
+  if(randomStatus !== 'الكل') pool = pool.filter(i => i.status === randomStatus);
+  // فلتر الفئات
+  if(!randomSelectedCats.has('الكل')) pool = pool.filter(i => randomSelectedCats.has(i.cat));
+  return pool;
+}
+
+function updateRandomPoolCount(){
+  const n = getRandomPool().length;
+  const el = document.getElementById('random-pool-count');
+  if(el) el.textContent = n > 0 ? `${n} عنصر متاح للسحب` : 'لا يوجد عناصر';
+}
+
+function renderRandomFilter(){
+  const cats = LIB_CATS.map(c => {
+    const cnt = window.items.filter(i => i.cat === c.id).length;
+    const isActive = randomSelectedCats.has('الكل') ? false : randomSelectedCats.has(c.id);
+    const isAll = randomSelectedCats.has('الكل');
+    return {
+      id: c.id, icon: c.icon, color: c.color, glow: c.glow, cnt, isActive
+    };
+  });
+  const allActive = randomSelectedCats.has('الكل');
+  let html = `<button class="random-filter-btn${allActive?' active':''}"
+    style="${allActive?'--filter-color:var(--accent);--filter-glow:var(--accent-glow);':''}"
+    onclick="toggleRandomCat('الكل')">
+    🎲 الكل <span class="f-cnt">${window.items.filter(i=>isLib(i.cat)).length}</span>
+  </button>`;
+  cats.forEach(c => {
+    html += `<button class="random-filter-btn${c.isActive?' active':''}"
+      style="${c.isActive?`--filter-color:${c.color};--filter-glow:${c.glow};`:''}"
+      onclick="toggleRandomCat('${c.id}')">
+      ${c.icon} ${c.id} <span class="f-cnt">${c.cnt}</span>
+    </button>`;
+  });
+  document.getElementById('random-filter').innerHTML = html;
+}
+
+function renderRandomStatusFilter(){
+  const opts = [
+    {val:'planned',  lbl:'🕐 أرغب بمشاهدته'},
+    {val:'watching', lbl:'▶️ أشاهده حالياً'},
+    {val:'الكل',     lbl:'📦 الكل'},
+  ];
+  document.getElementById('random-status-filter').innerHTML = opts.map(o =>
+    `<button class="status-pill${randomStatus===o.val?' active':''}" onclick="setRandomStatus('${o.val}')">${o.lbl}</button>`
+  ).join('');
+}
+
+function toggleRandomCat(cat){
+  if(cat === 'الكل'){
+    randomSelectedCats = new Set(['الكل']);
+  } else {
+    randomSelectedCats.delete('الكل');
+    if(randomSelectedCats.has(cat)) randomSelectedCats.delete(cat);
+    else randomSelectedCats.add(cat);
+    if(randomSelectedCats.size === 0) randomSelectedCats.add('الكل');
+  }
+  renderRandomFilter();
+  updateRandomPoolCount();
+  document.getElementById('random-result').innerHTML = '';
+}
+
+function setRandomStatus(s){
+  randomStatus = s;
+  renderRandomStatusFilter();
+  updateRandomPoolCount();
+  document.getElementById('random-result').innerHTML = '';
+}
+
 function spinRandom(){
-  let pool=window.items.filter(i=>i.status==='planned'&&isLib(i.cat));
-  if(randomCat!=='الكل')pool=pool.filter(i=>i.cat===randomCat);
-  if(!pool.length){document.getElementById('random-result').innerHTML=`<div class="random-empty">لا يوجد عناصر في قائمة "أرغب بمشاهدته" 😅</div>`;return;}
-  const item=pool[Math.floor(Math.random()*pool.length)];
-  const cat=catCfg(item.cat);
-  document.getElementById('random-result').innerHTML=`
+  const btn = document.getElementById('random-dice-btn');
+  // أنيميشن النرد
+  btn.classList.remove('rolling');
+  void btn.offsetWidth;
+  btn.classList.add('rolling');
+  btn.addEventListener('animationend', () => btn.classList.remove('rolling'), {once:true});
+
+  const pool = getRandomPool();
+  if(!pool.length){
+    document.getElementById('random-result').innerHTML = `
+      <div class="random-empty">
+        <span class="random-empty-icon">😅</span>
+        لا يوجد عناصر بهذه الفلاتر<br>
+        <span style="font-size:12px;color:var(--muted)">جرّب تغيير القسم أو الحالة</span>
+      </div>`;
+    return;
+  }
+  const item = pool[Math.floor(Math.random() * pool.length)];
+  const cat  = catCfg(item.cat);
+  const statusLabels = {planned:'🕐 أرغب بمشاهدته', watching:'▶️ أشاهده حالياً', completed:'✅ مكتمل'};
+
+  document.getElementById('random-result').innerHTML = `
     <div class="random-result">
-      ${item.img?`<img src="${item.img}">`:`<div class="random-result-placeholder">${cat.icon}</div>`}
+      ${item.img
+        ? `<img src="${item.img}" loading="lazy">`
+        : `<div class="random-result-placeholder" style="background:linear-gradient(135deg,${cat.color}22,${cat.color}08)">${cat.icon}</div>`
+      }
       <div class="random-result-body">
         <div class="random-result-name">${item.name}</div>
-        <div class="random-result-cat">${cat.icon} ${cat.id}</div>
-        ${item.priority?`<span class="priority-badge ${PRIORITY_CLASS[item.priority]}">${PRIORITY_LABEL[item.priority]}</span>`:''}
+        <div class="random-result-cat">
+          <span>${cat.icon}</span>
+          <span>${cat.id}</span>
+          ${item.priority ? `<span class="priority-badge ${PRIORITY_CLASS[item.priority]}">${PRIORITY_LABEL[item.priority]}</span>` : ''}
+        </div>
+        <div style="font-size:11px;color:var(--muted2);margin-bottom:4px;">${statusLabels[item.status]||''}</div>
+        ${item.score ? `<div style="font-size:12px;color:#fbbf24;font-weight:700;">★ ${item.score}/10</div>` : ''}
+        <div class="random-result-actions">
+          <button class="random-again-btn" onclick="spinRandom()">🎲 غيّر</button>
+          <button class="random-open-btn" onclick="openDetailById(${item.id})">تفاصيل →</button>
+        </div>
       </div>
     </div>`;
 }
@@ -2007,7 +2269,9 @@ window.closeStatsPage=closeStatsPage;
 window.openRandom=openRandom;
 window.closeRandom=closeRandom;
 window.spinRandom=spinRandom;
-window.setRandomCat=setRandomCat;
+window.toggleRandomCat=toggleRandomCat;
+window.setRandomStatus=setRandomStatus;
+window.openDetailById = function(id){ closeRandom(); setTimeout(()=>openDetail(id),120); };
 window.openAdd=openAdd;
 window.openEdit=openEdit;
 window.closeModal=closeModal;
