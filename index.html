@@ -2299,7 +2299,7 @@ renderSocial();
 import { initializeApp }                              from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
                                                       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getDatabase, ref, set, onValue, off }
+import { getDatabase, ref, set, onValue, off, get }
   from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // ══ إعداد Firebase ══
@@ -2530,15 +2530,39 @@ async function saveToCloud(uid) {
 function startListening(uid) {
   if (unsubscribe) { off(ref(db, "users/" + uid)); unsubscribe = null; }
   const userRef = ref(db, "users/" + uid);
+  const connectedRef = ref(db, ".info/connected");
+
+  // مراقبة حالة الاتصال بـ Firebase
+  let isConnected = false;
+  onValue(connectedRef, snap => {
+    isConnected = snap.val() === true;
+  });
+
   unsubscribe = onValue(userRef, snap => {
     if (snap.exists()) {
+      // ✅ في بيانات — حمّلها
       const data = snap.val();
       window.items  = data.items  || [];
       window.nextId = data.nextId || (window.items.length ? Math.max(...window.items.map(i=>i.id), 0) + 1 : 1);
+      window.renderLib();
+      window.renderSocial();
     } else {
-      window.items  = [];
-      window.nextId = 1;
+      // ⚠️ ما في بيانات — تأكد من الاتصال قبل المسح
+      if (isConnected) {
+        // متصل بالإنترنت وفعلاً ما في بيانات للمستخدم
+        window.items  = [];
+        window.nextId = 1;
+        window.renderLib();
+        window.renderSocial();
+      } else {
+        // ما في اتصال — لا تمسح البيانات الموجودة في الذاكرة
+        window.renderLib();
+        window.renderSocial();
+      }
     }
+  }, error => {
+    // ❌ خطأ بالقراءة — لا تمسح البيانات
+    console.error("Firebase read error:", error);
     window.renderLib();
     window.renderSocial();
   });
