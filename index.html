@@ -1314,8 +1314,8 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
           </div>
         </div>
         <div class="field" id="chapter-wrap" style="display:none;">
-          <label>آخر فصل وصلت له</label>
-          <input type="number" id="f-chapter" placeholder="120" min="1">
+          <label id="chapter-label">آخر فصل وصلت له</label>
+          <input type="number" id="f-chapter" placeholder="1" min="1">
         </div>
       </div>
       <div id="social-modal-fields" style="display:none;">
@@ -1730,7 +1730,12 @@ function openDetail(id){
   document.getElementById('detail-badges').innerHTML=b;
   let r='';
   if(item.score)r+=`<div class="detail-row"><span class="detail-row-label">التقييم</span><span class="detail-row-val">★ ${item.score}/10</span></div>`;
-  if(item.chapter)r+=`<div class="detail-row"><span class="detail-row-label">آخر فصل</span><span class="detail-row-val">📖 فصل ${item.chapter}</span></div>`;
+  if(item.chapter){
+    const chLabel={'مانغا':'آخر فصل','أنمي':'آخر حلقة','كتب':'آخر صفحة','مسلسلات':'آخر حلقة'};
+    const chIcon={'مانغا':'📖','أنمي':'▶️','كتب':'📄','مسلسلات':'▶️'};
+    const lbl=chLabel[item.cat]||'التقدم';const ico=chIcon[item.cat]||'📌';
+    r+=`<div class="detail-row"><span class="detail-row-label">${lbl}</span><span class="detail-row-val">${ico} ${item.chapter}</span></div>`;
+  }
   if(item.dateAdded)r+=`<div class="detail-row"><span class="detail-row-label">تاريخ الإضافة</span><span class="detail-row-val">📅 ${formatDate(item.dateAdded)}</span></div>`;
   if(item.link&&sc)r+=`<div class="detail-row"><a class="detail-link-btn ${sc.linkClass}" href="${item.link}" target="_blank">${sc.linkLabel}</a></div>`;
   document.getElementById('detail-rows').innerHTML=r;
@@ -1824,7 +1829,7 @@ function renderLib(){
           <div class="card-name">${i.name}</div>
           <div class="card-meta">
             ${i.priority?`<span class="priority-badge ${PRIORITY_CLASS[i.priority]}">${PRIORITY_LABEL[i.priority]}</span>`:''}
-            ${i.cat==='مانغا'&&i.chapter?`<span class="card-date">📖 فصل ${i.chapter}</span>`:''}
+            ${['مانغا','أنمي','كتب','مسلسلات'].includes(i.cat)&&i.chapter?`<span class="card-date">${i.cat==='كتب'?'📄 ص':i.cat==='مانغا'?'📖 فصل':'▶ حلقة'} ${i.chapter}</span>`:''}
             ${i.dateAdded?`<span class="card-date">📅 ${formatDate(i.dateAdded)}</span>`:''}
           </div>
           <div class="card-bottom">
@@ -1903,7 +1908,11 @@ function onCatChange(){
   document.getElementById('lib-modal-fields').style.display=social?'none':'block';
   document.getElementById('social-modal-fields').style.display=social?'block':'none';
   document.getElementById('priority-wrap').style.display=social?'none':'block';
-  document.getElementById('chapter-wrap').style.display=cat==='مانغا'?'block':'none';
+  const chapterCats=['مانغا','أنمي','كتب','مسلسلات'];
+  const chapterLabels={'مانغا':'آخر فصل وصلت له','أنمي':'آخر حلقة وصلت لها','كتب':'آخر صفحة وصلت لها','مسلسلات':'آخر حلقة وصلت لها'};
+  const showChapter=chapterCats.includes(cat);
+  document.getElementById('chapter-wrap').style.display=showChapter?'block':'none';
+  if(showChapter)document.getElementById('chapter-label').textContent=chapterLabels[cat];
   document.getElementById('modal-save-btn').className=social?'btn-save social-save':'btn-save lib-save';
 }
 
@@ -1965,7 +1974,7 @@ function saveItem(){
   const priority=social?'':document.getElementById('f-priority').value;
   const note=document.getElementById('f-note').value.trim();
   const cv=document.getElementById('f-chapter').value;
-  const chapter=(!social&&cat==='مانغا'&&cv)?parseInt(cv):null;
+  const chapter=(!social&&['مانغا','أنمي','كتب','مسلسلات'].includes(cat)&&cv)?parseInt(cv):null;
   const img=currentImgData||'';
   if(editingId){
     const idx=window.items.findIndex(i=>i.id===editingId);
