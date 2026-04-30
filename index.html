@@ -1748,7 +1748,22 @@ function closeDetail(){document.getElementById('detail-bg').classList.remove('op
 // ══ IMAGE ══
 function triggerFileInput(){document.getElementById('img-file-input').click();}
 function handleFileInput(e){const f=e.target.files[0];if(f)processImg(f);e.target.value='';}
-function processImg(file){if(!file.type.startsWith('image/'))return;const r=new FileReader();r.onload=ev=>setImage(ev.target.result);r.readAsDataURL(file);}
+async function processImg(file){
+  if(!file.type.startsWith('image/'))return;
+  showToast('⏳ جاري رفع الصورة...');
+  try{
+    const fd=new FormData();
+    fd.append('file',file);
+    fd.append('upload_preset','majd179');
+    const res=await fetch('https://api.cloudinary.com/v1_1/dcram5zyx/image/upload',{method:'POST',body:fd});
+    const data=await res.json();
+    if(data.secure_url){
+      const url=data.secure_url.replace('/upload/','/upload/w_400,q_auto,f_auto/');
+      setImage(url);showToast('✅ تم رفع الصورة');
+    }
+    else showToast('❌ فشل رفع الصورة');
+  }catch(e){showToast('❌ فشل الاتصال بـ Cloudinary');}
+}
 function setImage(d){currentImgData=d;document.getElementById('drop-preview').src=d;document.getElementById('drop-zone').classList.add('has-img');document.getElementById('drop-actions').classList.add('has-img-actions');}
 function removeImage(){currentImgData='';document.getElementById('drop-preview').src='';document.getElementById('drop-zone').classList.remove('has-img');document.getElementById('drop-actions').classList.remove('has-img-actions');}
 function resetImgUI(){removeImage();document.getElementById('img-file-input').value='';}
