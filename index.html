@@ -2535,8 +2535,13 @@ function hideLoginScreen() {
 // ══ حفظ البيانات على Firestore ══
 async function saveToCloud(uid) {
   try {
+    const cleanItems = window.items.map(i => {
+      const item = {...i};
+      if(item.img && item.img.startsWith('data:')) item.img = '';
+      return item;
+    });
     const payload = {
-      items:   JSON.parse(JSON.stringify(window.items)),
+      items:   cleanItems,
       nextId:  window.nextId,
       savedAt: Date.now()
     };
