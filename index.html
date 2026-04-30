@@ -1758,7 +1758,7 @@ async function processImg(file){
     const res=await fetch('https://api.cloudinary.com/v1_1/dcram5zyx/image/upload',{method:'POST',body:fd});
     const data=await res.json();
     if(data.secure_url){
-      const url=data.secure_url.replace('/upload/','/upload/w_400,q_auto,f_auto/');
+      const url=data.secure_url.replace('/upload/','/upload/w_400,q_56,f_auto/');
       setImage(url);showToast('✅ تم رفع الصورة');
     }
     else showToast('❌ فشل رفع الصورة');
