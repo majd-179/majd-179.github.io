@@ -1525,6 +1525,13 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
     <span class="settings-item-text" id="theme-settings-text">الوضع الليلي</span>
     <span class="settings-item-arrow">›</span>
   </button>
+
+  <div class="settings-section-label">المساعدة</div>
+  <button class="settings-item" id="settings-support-btn" onclick="window.location.href='mailto:majd179git@gmail.com?subject=دعم مكتبتي'">
+    <span class="settings-item-icon">💬</span>
+    <span class="settings-item-text">الدعم</span>
+    <span class="settings-item-arrow">›</span>
+  </button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2466,6 +2473,8 @@ function showLoginScreen() {
         text-align:center;font-family:'Tajawal',sans-serif;
         animation:lsFadeUp 0.5s 0.6s ease both;opacity:0;animation-fill-mode:both;
       }
+      #ls-footer a{color:rgba(26,184,168,0.7);text-decoration:none;border-bottom:1px solid rgba(26,184,168,0.3);transition:color 0.2s,border-color 0.2s;}
+      #ls-footer a:hover{color:rgba(26,184,168,1);border-color:rgba(26,184,168,0.8);}
     </style>
 
     <div id="ls-orb1"></div>
@@ -2494,7 +2503,7 @@ function showLoginScreen() {
         <span id="ls-btn-text">تسجيل الدخول بـ Google</span>
       </button>
       <div id="login-error"></div>
-      <div id="ls-footer">بالضغط فأنت توافق على حفظ بياناتك على Firebase</div>
+      <div id="ls-footer">بالمتابعة فأنت توافق على شروط وسياسة الخصوصية<br><a href="https://majd-179.github.io/privacy-policy.html" target="_blank">سياسة الخصوصية</a></div>
     </div>
     `;
 
