@@ -597,7 +597,16 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .btn-danger:hover{background:rgba(248,113,113,0.22);transform:translateY(-1px);}
 
 /* ══ Score bar ══ */
-.card-score-bar{margin-top:7px;}
+.card-series-badge{
+  display:inline-block;font-size:10px;padding:2px 9px;border-radius:20px;
+  background:rgba(26,184,168,0.12);color:var(--accent);
+  border:1px solid rgba(26,184,168,0.2);
+  margin-bottom:6px;cursor:pointer;font-weight:600;
+  transition:background 0.15s;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.card-series-badge:hover{background:rgba(26,184,168,0.22);}
+
 .score-bar-track{height:3px;background:var(--surface3);border-radius:4px;overflow:hidden;margin-bottom:4px;}
 .score-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#fbbf24,#f97316);transition:width 0.6s cubic-bezier(0.34,1.3,0.64,1);}
 .card-score-label{font-size:10px;color:#fbbf24;font-weight:700;}
@@ -1270,7 +1279,8 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
         </div>
         <input type="file" accept="image/*" id="img-file-input" style="display:none;" onchange="handleFileInput(event)">
       </div>
-      <div class="field"><label>الاسم</label><input type="text" id="f-name" placeholder="مثلاً: Attack on Titan"></div>
+      <div class="field"><label>الاسم</label><input type="text" id="f-name" placeholder="مثلاً: Attack on Titan Season 2"></div>
+      <div class="field"><label>السلسلة <span style="font-size:10px;color:var(--muted2);font-weight:400;">(اختياري — لربط الأجزاء ببعض)</span></label><input type="text" id="f-series" placeholder="مثلاً: Attack on Titan" list="series-suggestions" autocomplete="off"><datalist id="series-suggestions"></datalist></div>
       <div class="field-row">
         <div class="field">
           <label>الفئة</label>
@@ -1723,7 +1733,7 @@ function sortItems(arr,sortId){
   return copy;
 }
 function formatDate(ts){if(!ts)return'';return new Date(ts).toLocaleDateString('ar-SA',{year:'numeric',month:'short',day:'numeric'});}
-function matchSearch(i,q){if(!q)return true;const ql=q.toLowerCase();return i.name.toLowerCase().includes(ql)||(i.note||'').toLowerCase().includes(ql)||(i.score&&String(i.score).includes(ql));}
+function matchSearch(i,q){if(!q)return true;const ql=q.toLowerCase();return i.name.toLowerCase().includes(ql)||(i.note||'').toLowerCase().includes(ql)||(i.score&&String(i.score).includes(ql))||(i.series||'').toLowerCase().includes(ql);}
 
 // ══ MENUS ══
 function toggleMenu(e,id){e.stopPropagation();const dd=document.getElementById('dd-'+id);if(!dd)return;const was=dd.classList.contains('open');closeAllMenus();if(!was)dd.classList.add('open');}
@@ -1744,6 +1754,7 @@ function openDetail(id){
   document.getElementById('detail-badges').innerHTML=b;
   let r='';
   if(item.score)r+=`<div class="detail-row"><span class="detail-row-label">التقييم</span><span class="detail-row-val">★ ${item.score}/10</span></div>`;
+  if(item.series)r+=`<div class="detail-row"><span class="detail-row-label">السلسلة</span><span class="detail-row-val" style="color:var(--accent);cursor:pointer;" onclick="closeDetail();document.getElementById('lib-search').value='${item.series.replace(/'/g,"\\'")}';libSearch='${item.series.replace(/'/g,"\\'")}';renderLib();">🔗 ${item.series} ← عرض كل الأجزاء</span></div>`;
   if(item.chapter){
     const chLabel={'مانغا':'آخر فصل','أنمي':'آخر حلقة','كتب':'آخر صفحة','مسلسلات':'آخر حلقة'};
     const chIcon={'مانغا':'📖','أنمي':'▶️','كتب':'📄','مسلسلات':'▶️'};
@@ -1856,6 +1867,7 @@ function renderLib(){
         </div>
         <div class="card-body">
           <div class="card-name">${i.name}</div>
+          ${i.series?`<div class="card-series-badge" onclick="event.stopPropagation();document.getElementById('lib-search').value='${i.series.replace(/'/g,"\\'")}';libSearch='${i.series.replace(/'/g,"\\'")}';renderLib();">🔗 ${i.series}</div>`:''}
           <div class="card-meta">
             ${i.priority?`<span class="priority-badge ${PRIORITY_CLASS[i.priority]}">${PRIORITY_LABEL[i.priority]}</span>`:''}
             ${['مانغا','أنمي','كتب','مسلسلات'].includes(i.cat)&&i.chapter?`<span class="card-date">${i.cat==='كتب'?'📄 ص':i.cat==='مانغا'?'📖 فصل':'▶ حلقة'} ${i.chapter}</span>`:''}
@@ -1943,6 +1955,7 @@ function onCatChange(){
   document.getElementById('chapter-wrap').style.display=showChapter?'block':'none';
   if(showChapter)document.getElementById('chapter-label').textContent=chapterLabels[cat];
   document.getElementById('modal-save-btn').className=social?'btn-save social-save':'btn-save lib-save';
+  populateSeriesSuggestions();
 }
 
 function openAdd(presetCat, tab){
@@ -1958,6 +1971,8 @@ function openAdd(presetCat, tab){
   document.getElementById('f-priority').value='';
   document.getElementById('f-note').value='';
   document.getElementById('f-chapter').value='';
+  document.getElementById('f-series').value='';
+  populateSeriesSuggestions();
   onCatChange();
   const del=document.getElementById('btn-delete');if(del)del.remove();
   document.getElementById('modal-bg').classList.add('open');
@@ -1977,6 +1992,8 @@ function openEdit(id){
   document.getElementById('f-priority').value=item.priority||'';
   document.getElementById('f-note').value=item.note||'';
   document.getElementById('f-chapter').value=item.chapter||'';
+  document.getElementById('f-series').value=item.series||'';
+  populateSeriesSuggestions();
   onCatChange();
   if(item.img)setImage(item.img);
   const actions=document.getElementById('modal-actions');
@@ -1987,6 +2004,13 @@ function openEdit(id){
     actions.insertBefore(btn,actions.firstChild);
   }
   document.getElementById('modal-bg').classList.add('open');
+}
+
+function populateSeriesSuggestions(){
+  const cat=document.getElementById('f-cat').value;
+  const existing=[...new Set(window.items.filter(i=>i.cat===cat&&i.series).map(i=>i.series))];
+  const dl=document.getElementById('series-suggestions');
+  if(dl)dl.innerHTML=existing.map(s=>`<option value="${s}">`).join('');
 }
 
 function closeModal(){document.getElementById('modal-bg').classList.remove('open');const del=document.getElementById('btn-delete');if(del)del.remove();}
@@ -2004,13 +2028,20 @@ function saveItem(){
   const note=document.getElementById('f-note').value.trim();
   const cv=document.getElementById('f-chapter').value;
   const chapter=(!social&&['مانغا','أنمي','كتب','مسلسلات'].includes(cat)&&cv)?parseInt(cv):null;
+  const series=document.getElementById('f-series').value.trim();
   const img=currentImgData||'';
   if(editingId){
     const idx=window.items.findIndex(i=>i.id===editingId);
-    if(idx>-1)window.items[idx]={...window.items[idx],name,cat,status,score,link,priority,note,chapter,img};
+    if(idx>-1)window.items[idx]={...window.items[idx],name,cat,status,score,link,priority,note,chapter,series,img};
     showToast('تم الحفظ ✓');
   } else {
-    window.items.unshift({id:window.nextId++,name,cat,status,score,link,priority,note,chapter,img,dateAdded:Date.now()});
+    // فحص التكرار: نفس الاسم في نفس القسم فقط
+    const duplicate=window.items.find(i=>i.cat===cat&&i.name.trim().toLowerCase()===name.toLowerCase());
+    if(duplicate){
+      showToast('⚠️ هذا العنصر موجود بالفعل في هذا القسم!');
+      return;
+    }
+    window.items.unshift({id:window.nextId++,name,cat,status,score,link,priority,note,chapter,series,img,dateAdded:Date.now()});
     if(social){activeSocialCat=cat;switchPage('social');}
     else{activeLibCat=cat;catStatus[cat]='الكل';switchPage('lib');}
     showToast('تمت الإضافة ✓');
