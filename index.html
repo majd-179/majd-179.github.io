@@ -303,6 +303,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .social-card.scat-موسيقى:hover{border-color:rgba(251,146,60,0.3);}
 .social-card.scat-يوتيوب:hover{border-color:rgba(248,113,113,0.3);}
 .social-card.scat-انستغرام:hover{border-color:rgba(232,121,249,0.3);}
+.social-card.scat-مواقع:hover{border-color:rgba(96,165,250,0.3);}
 .social-inner{overflow:hidden;border-radius:var(--radius);flex:1;display:flex;flex-direction:column;cursor:pointer;}
 .social-cover-wrap{position:relative;overflow:hidden;}
 .social-cover{width:100%;height:175px;object-fit:cover;display:block;transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);}
@@ -321,6 +322,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .link-موسيقى{color:var(--music);background:var(--music-bg);border-color:rgba(251,146,60,0.2);}
 .link-يوتيوب{color:var(--youtube);background:var(--youtube-bg);border-color:rgba(248,113,113,0.2);}
 .link-انستغرام{color:var(--insta);background:var(--insta-bg);border-color:rgba(232,121,249,0.2);}
+.link-مواقع{color:var(--books);background:var(--books-bg);border-color:rgba(96,165,250,0.2);}
 .social-no-link{font-size:12px;color:var(--muted);font-style:italic;}
 .social-note{font-size:12px;color:var(--text2);line-height:1.6;border-top:1px solid var(--border);padding-top:7px;}
 
@@ -1208,7 +1210,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
       <div class="hero-icon social-icon">🎵</div>
       <div>
         <div class="hero-title social-title">وسائل التواصل</div>
-        <div class="hero-sub">موسيقى · يوتيوب · انستغرام</div>
+        <div class="hero-sub">موسيقى · يوتيوب · انستغرام · مواقع</div>
       </div>
     </button>
     <div class="hero-right">
@@ -1284,7 +1286,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
         <input type="file" accept="image/*" id="img-file-input" style="display:none;" onchange="handleFileInput(event)">
       </div>
       <div class="field"><label>الاسم</label><input type="text" id="f-name" placeholder="مثلاً: Attack on Titan Season 2"></div>
-      <div class="field"><label>السلسلة <span style="font-size:10px;color:var(--muted2);font-weight:400;">(اختياري — لربط الأجزاء ببعض)</span></label><input type="text" id="f-series" placeholder="مثلاً: Attack on Titan" list="series-suggestions" autocomplete="off"><datalist id="series-suggestions"></datalist></div>
+      <div class="field" id="series-wrap"><label>السلسلة <span style="font-size:10px;color:var(--muted2);font-weight:400;">(اختياري — لربط الأجزاء ببعض)</span></label><input type="text" id="f-series" placeholder="مثلاً: Attack on Titan" list="series-suggestions" autocomplete="off"><datalist id="series-suggestions"></datalist></div>
       <div class="field-row">
         <div class="field">
           <label>الفئة</label>
@@ -1301,6 +1303,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
               <option value="موسيقى">🎵 موسيقى</option>
               <option value="يوتيوب">▶️ يوتيوب</option>
               <option value="انستغرام">📸 انستغرام</option>
+              <option value="مواقع">🌐 مواقع</option>
             </optgroup>
           </select>
         </div>
@@ -1569,6 +1572,7 @@ const SOCIAL_CATS=[
   {id:'موسيقى',icon:'🎵',color:'var(--music)',glow:'var(--music-glow)',border:'rgba(249,115,22,0.3)',linkLabel:'▶ استمع الآن',linkClass:'link-موسيقى'},
   {id:'يوتيوب',icon:'▶️',color:'var(--youtube)',glow:'var(--youtube-glow)',border:'rgba(255,60,60,0.3)',linkLabel:'▶ شاهد الآن',linkClass:'link-يوتيوب'},
   {id:'انستغرام',icon:'📸',color:'var(--insta)',glow:'var(--insta-glow)',border:'rgba(193,53,132,0.3)',linkLabel:'🔗 فتح الحساب',linkClass:'link-انستغرام'},
+  {id:'مواقع',icon:'🌐',color:'var(--books)',glow:'var(--books-glow)',border:'rgba(96,165,250,0.3)',linkLabel:'🌐 فتح الموقع',linkClass:'link-مواقع'},
 ];
 const ALL_CATS=[...LIB_CATS,...SOCIAL_CATS];
 const STATUS_LABEL={planned:'أرغب بمشاهدته',watching:'أشاهده حالياً',completed:'تمت المشاهدة'};
@@ -1902,11 +1906,13 @@ function renderSocial(){
   const musicCnt=window.items.filter(i=>i.cat==='موسيقى').length;
   const ytCnt=window.items.filter(i=>i.cat==='يوتيوب').length;
   const instaCnt=window.items.filter(i=>i.cat==='انستغرام').length;
+  const mawaqiCnt=window.items.filter(i=>i.cat==='مواقع').length;
   document.getElementById('social-stats').innerHTML=`
     <div class="stat-always" style="--stat-color:var(--music)"><div class="stat-num">${socialItems.length}</div><div class="stat-lbl">إجمالي</div></div>
     <div class="stat-always" style="--stat-color:var(--music)"><div class="stat-num">${musicCnt}</div><div class="stat-lbl">🎵 موسيقى</div></div>
     <div class="stat-always" style="--stat-color:var(--youtube)"><div class="stat-num">${ytCnt}</div><div class="stat-lbl">▶️ يوتيوب</div></div>
-    <div class="stat-always" style="--stat-color:var(--insta)"><div class="stat-num">${instaCnt}</div><div class="stat-lbl">📸 انستغرام</div></div>`;
+    <div class="stat-always" style="--stat-color:var(--insta)"><div class="stat-num">${instaCnt}</div><div class="stat-lbl">📸 انستغرام</div></div>
+    <div class="stat-always" style="--stat-color:var(--books)"><div class="stat-num">${mawaqiCnt}</div><div class="stat-lbl">🌐 مواقع</div></div>`;
   document.getElementById('nav-social-cnt').textContent=socialItems.length;
   document.getElementById('social-cat-nav').innerHTML=SOCIAL_CATS.map(c=>{
     const cnt=window.items.filter(i=>i.cat===c.id).length;
@@ -1959,6 +1965,7 @@ function onCatChange(){
   document.getElementById('chapter-wrap').style.display=showChapter?'block':'none';
   if(showChapter)document.getElementById('chapter-label').textContent=chapterLabels[cat];
   document.getElementById('modal-save-btn').className=social?'btn-save social-save':'btn-save lib-save';
+  document.getElementById('series-wrap').style.display=social?'none':'block';
   populateSeriesSuggestions();
 }
 
