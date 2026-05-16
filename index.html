@@ -326,6 +326,102 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .social-no-link{font-size:12px;color:var(--muted);font-style:italic;}
 .social-note{font-size:12px;color:var(--text2);line-height:1.6;border-top:1px solid var(--border);padding-top:7px;}
 
+/* ══ Website List — شكل قائمة خاص بالمواقع ══ */
+.website-list{display:flex;flex-direction:column;gap:10px;overflow:visible;position:relative;}
+
+.website-row{
+  position:relative;
+  background:linear-gradient(110deg,var(--surface2) 0%,var(--surface) 100%);
+  border:1px solid var(--border);
+  border-radius:18px;
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;
+  cursor:pointer;
+  transition:all 0.28s cubic-bezier(0.34,1.4,0.64,1);
+  animation:cardIn 0.35s ease both;
+  overflow:visible;
+}
+.website-row::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(96,165,250,0.06) 0%,transparent 50%);
+  opacity:0;transition:opacity 0.25s;
+  pointer-events:none;border-radius:18px;
+}
+.website-row:hover{
+  border-color:rgba(96,165,250,0.3);
+  transform:translateX(-4px);
+  box-shadow:4px 0 0 0 rgba(96,165,250,0.4), 0 8px 30px rgba(0,0,0,0.3);
+}
+.website-row:hover::before{opacity:1;}
+
+/* شريط أزرق جانبي */
+.website-row::after{
+  content:'';position:absolute;
+  right:0;top:20%;bottom:20%;
+  width:3px;border-radius:4px 0 0 4px;
+  background:linear-gradient(to bottom,#60a5fa,#3b82f6);
+  opacity:0;transition:opacity 0.25s;
+}
+.website-row:hover::after{opacity:1;}
+
+.website-favicon-wrap{
+  width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg,var(--surface3),var(--surface4));
+  border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;overflow:hidden;
+  box-shadow:0 4px 14px rgba(0,0,0,0.35);
+  transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.website-row:hover .website-favicon-wrap{transform:scale(1.08) rotate(-3deg);}
+.website-favicon{width:30px;height:30px;object-fit:contain;}
+.website-favicon-fallback{font-size:24px;line-height:1;}
+
+.website-row-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.website-row-name{
+  font-size:14.5px;font-weight:800;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:0.1px;
+}
+.website-row-domain{
+  font-size:11px;color:var(--muted2);
+  display:flex;align-items:center;gap:5px;
+}
+.website-row-domain::before{
+  content:'';width:5px;height:5px;border-radius:50%;
+  background:#60a5fa;flex-shrink:0;
+  box-shadow:0 0 5px #60a5fa;
+}
+.website-row-date{font-size:10px;color:var(--muted);margin-top:1px;}
+
+.website-row-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.website-visit-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:700;font-family:'Tajawal',sans-serif;
+  color:#60a5fa;
+  background:rgba(96,165,250,0.1);
+  border:1px solid rgba(96,165,250,0.2);
+  border-radius:20px;padding:7px 14px;
+  text-decoration:none;white-space:nowrap;
+  transition:all 0.2s cubic-bezier(0.34,1.3,0.64,1);
+}
+.website-visit-btn:hover{background:rgba(96,165,250,0.2);transform:translateY(-2px);}
+
+/* 3 نقاط مخصصة للمواقع */
+.website-row .card-menu-wrap{position:relative;top:auto;left:auto;z-index:20;}
+.website-row .card-dots{opacity:1;background:var(--glass2);width:34px;height:34px;border-radius:10px;color:var(--text2);}
+.website-row .card-dropdown{position:absolute;top:38px;left:0;right:auto;z-index:9999;}
+.website-row:has(.card-dropdown.open){z-index:100;}
+
+.website-add-row{
+  width:100%;border:1.5px dashed var(--border2);border-radius:18px;
+  background:transparent;color:var(--muted);
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;
+  padding:16px;display:flex;align-items:center;justify-content:center;gap:8px;
+  cursor:pointer;transition:all 0.25s cubic-bezier(0.34,1.3,0.64,1);
+}
+.website-add-row:hover{border-color:#60a5fa;color:#60a5fa;background:rgba(96,165,250,0.05);}
+
 /* ══ Add card ══ */
 .add-card{background:transparent;border:1.5px dashed var(--border2);border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;gap:8px;transition:all 0.28s cubic-bezier(0.34,1.3,0.64,1);min-height:140px;width:100%;}
 .add-card .plus{font-size:30px;opacity:0.35;transition:all 0.28s cubic-bezier(0.34,1.56,0.64,1);}
@@ -1923,7 +2019,34 @@ function renderSocial(){
   const cat=SOCIAL_CATS.find(c=>c.id===activeSocialCat)||SOCIAL_CATS[0];
   const q=socialSearch;
   let filtered=sortItems(window.items.filter(i=>i.cat===activeSocialCat&&matchSearch(i,q)),'social-sort');
-  let cards=filtered.map((i,idx)=>`
+  const isWebsite = activeSocialCat === 'مواقع';
+
+  function websiteCardHTML(i, idx) {
+    const domain = i.link ? (() => { try { return new URL(i.link).hostname.replace('www.',''); } catch(e){ return i.link; } })() : '';
+    const faviconUrl = i.link ? `https://www.google.com/s2/favicons?domain=${domain}&sz=64` : '';
+    return `
+    <div class="website-row" style="animation-delay:${idx*0.05}s" onclick="openDetail(${i.id})">
+      <div class="website-favicon-wrap">
+        ${faviconUrl
+          ? `<img class="website-favicon" src="${faviconUrl}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" loading="lazy"><span class="website-favicon-fallback" style="display:none">🌐</span>`
+          : `<span class="website-favicon-fallback">🌐</span>`}
+      </div>
+      <div class="website-row-info">
+        <div class="website-row-name">${i.name}</div>
+        ${domain?`<div class="website-row-domain">${domain}</div>`:''}
+        ${i.dateAdded?`<div class="website-row-date">📅 ${formatDate(i.dateAdded)}</div>`:''}
+      </div>
+      <div class="website-row-actions" onclick="event.stopPropagation()">
+        ${i.link?`<a class="website-visit-btn" href="${i.link}" target="_blank">🌐 فتح</a>`:''}
+        ${menuHTML(i.id)}
+      </div>
+    </div>`;
+  }
+
+  let cards = filtered.map((i, idx) =>
+    i.cat === 'مواقع'
+      ? websiteCardHTML(i, idx)
+      : `
     <div class="social-card scat-${i.cat}" style="animation-delay:${idx*0.04}s">
       ${menuHTML(i.id)}
       ${i.note?`<div class="has-note-dot"></div>`:''}
@@ -1937,14 +2060,20 @@ function renderSocial(){
           ${i.link?`<a class="social-link-btn ${cat.linkClass}" href="${i.link}" target="_blank" onclick="event.stopPropagation()">${cat.linkLabel}</a>`:`<span class="social-no-link">لا يوجد رابط</span>`}
         </div>
       </div>
-    </div>`).join('');
-  cards+=`<button class="add-card social-add-card" onclick="openAdd('${activeSocialCat}','social')"><span class="plus">+</span>إضافة</button>`;
+    </div>`
+  ).join('');
+  const addCardHtml = isWebsite
+    ? `<button class="website-add-row" onclick="openAdd('${activeSocialCat}','social')"><span style="font-size:22px;opacity:0.4">+</span> إضافة موقع</button>`
+    : `<button class="add-card social-add-card" onclick="openAdd('${activeSocialCat}','social')"><span class="plus">+</span>إضافة</button>`;
+  cards += addCardHtml;
   document.getElementById('social-section').innerHTML=`
     <div>
       <div class="section-header">
         <div class="section-title" style="--cat-color:${cat.color}"><span class="cat-dot"></span>${cat.icon} ${cat.id}</div>
       </div>
-      <div class="grid">${filtered.length?cards:`<div class="empty">${cat.icon}<br>لا يوجد عناصر هنا بعد</div>`}</div>
+      ${filtered.length
+        ? `<div class="${isWebsite?'website-list':'grid'}">${cards}</div>`
+        : `<div class="${isWebsite?'website-list':'grid'}"><div class="${isWebsite?'':'empty'}" style="${isWebsite?'padding:2rem;text-align:center;color:var(--muted);font-size:14px;':''}">${cat.icon}<br>لا يوجد عناصر هنا بعد</div>${addCardHtml}</div>`}
     </div>`;
 }
 
