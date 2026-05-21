@@ -3,7 +3,7 @@
 <head>
 <meta name="google-site-verification" content="Q0Vd53wcy2WIu5nVzpJY0zN2bjcUfANrOWO_uQQl6M4" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>مكتبتي</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Cairo:wght@400;700;900&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -38,7 +38,7 @@
   --glass:rgba(0,0,0,0.01);--glass2:rgba(0,0,0,0.03);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;transition:background 0.4s,color 0.4s;}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);transition:background 0.4s,color 0.4s;}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(26,184,168,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(26,184,168,0.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0;}
 body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(26,184,168,0.08) 0%,transparent 60%);pointer-events:none;z-index:0;}
 .bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
@@ -56,6 +56,9 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
   will-change:transform,opacity;
 }
 .page.active{display:block;}
+/* منع الرجة على الموبايل */
+html{height:-webkit-fill-available;}
+body{min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh;overflow-x:hidden;overscroll-behavior:none;}
 @keyframes pageSlideInRight{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
 @keyframes pageSlideInLeft{from{opacity:0;transform:translateX(-40px);}to{opacity:1;transform:translateX(0);}}
 .page.slide-in-right{animation:pageSlideInRight 0.42s ease both;}
@@ -143,7 +146,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .icon-btn:hover{background:var(--surface3);border-color:var(--border3);transform:scale(1.08);}
 
 /* ══ Bottom Nav (Tabs) ══ */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:center;padding:0.7rem 1rem 1.1rem;background:linear-gradient(to top,var(--bg) 60%,transparent);}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:center;padding:0.7rem 1rem calc(1.1rem + env(safe-area-inset-bottom, 0px));background:linear-gradient(to top,var(--bg) 60%,transparent);transform:translateZ(0);-webkit-transform:translateZ(0);}
 .bottom-nav-inner{display:flex;gap:5px;background:rgba(13,13,28,0.75);border:1px solid rgba(255,255,255,0.07);border-radius:22px;padding:5px;box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.03);backdrop-filter:blur(20px);}
 .light .bottom-nav-inner{background:rgba(255,255,255,0.82);border-color:rgba(0,0,0,0.07);}
 .nav-tab{
