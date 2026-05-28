@@ -3,7 +3,7 @@
 <head>
 <meta name="google-site-verification" content="Q0Vd53wcy2WIu5nVzpJY0zN2bjcUfANrOWO_uQQl6M4" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>مكتبتي</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Cairo:wght@400;700;900&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -38,7 +38,7 @@
   --glass:rgba(0,0,0,0.01);--glass2:rgba(0,0,0,0.03);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);transition:background 0.4s,color 0.4s;}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;transition:background 0.4s,color 0.4s;}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(26,184,168,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(26,184,168,0.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0;}
 body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(26,184,168,0.08) 0%,transparent 60%);pointer-events:none;z-index:0;}
 .bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
@@ -56,9 +56,6 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
   will-change:transform,opacity;
 }
 .page.active{display:block;}
-/* منع الرجة على الموبايل */
-html{height:-webkit-fill-available;}
-body{min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh;overflow-x:hidden;overscroll-behavior:none;}
 @keyframes pageSlideInRight{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
 @keyframes pageSlideInLeft{from{opacity:0;transform:translateX(-40px);}to{opacity:1;transform:translateX(0);}}
 .page.slide-in-right{animation:pageSlideInRight 0.42s ease both;}
@@ -146,7 +143,7 @@ body{min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh;overfl
 .icon-btn:hover{background:var(--surface3);border-color:var(--border3);transform:scale(1.08);}
 
 /* ══ Bottom Nav (Tabs) ══ */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:center;padding:0.7rem 1rem calc(1.1rem + env(safe-area-inset-bottom, 0px));background:linear-gradient(to top,var(--bg) 60%,transparent);transform:translateZ(0);-webkit-transform:translateZ(0);}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:center;padding:0.7rem 1rem 1.1rem;background:linear-gradient(to top,var(--bg) 60%,transparent);}
 .bottom-nav-inner{display:flex;gap:5px;background:rgba(13,13,28,0.75);border:1px solid rgba(255,255,255,0.07);border-radius:22px;padding:5px;box-shadow:0 8px 40px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.03);backdrop-filter:blur(20px);}
 .light .bottom-nav-inner{background:rgba(255,255,255,0.82);border-color:rgba(0,0,0,0.07);}
 .nav-tab{
@@ -285,6 +282,241 @@ body{min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh;overfl
 .card-score{font-size:12px;color:#fbbf24;font-weight:700;}
 .has-note-dot{position:absolute;top:10px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent),0 0 16px var(--accent);z-index:5;animation:pulseDot 2s ease-in-out infinite;}
 @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.7;transform:scale(0.85);}}
+
+/* ══════════════════════════════════
+   🎮 GAME CARD — تصميم خاص بالألعاب
+══════════════════════════════════ */
+@keyframes scanline{0%{transform:translateY(-100%);}100%{transform:translateY(100vh);}}
+@keyframes gameCardIn{from{opacity:0;transform:translateX(30px) skewX(-2deg);}to{opacity:1;transform:translateX(0) skewX(0deg);}}
+@keyframes gameGlow{0%,100%{box-shadow:0 0 18px rgba(74,222,128,0.12),0 6px 28px rgba(0,0,0,0.5);}50%{box-shadow:0 0 30px rgba(74,222,128,0.25),0 6px 28px rgba(0,0,0,0.5);}}
+
+/* الغريد الخاص بالألعاب — صف واحد أوسع */
+.grid-games{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:14px;
+}
+
+.game-card{
+  position:relative;
+  background:linear-gradient(135deg,var(--surface2) 0%,var(--surface) 60%,rgba(74,222,128,0.04) 100%);
+  border:1px solid rgba(74,222,128,0.18);
+  border-radius:18px;
+  overflow:visible;
+  display:flex;
+  flex-direction:row;
+  align-items:stretch;
+  height:130px;
+  cursor:pointer;
+  transition:all 0.3s cubic-bezier(0.34,1.3,0.64,1);
+  isolation:isolate;
+}
+/* لا pseudo-elements على البطاقة نفسها */
+.game-card::before{ content:none; }
+.game-card::after{ content:none; }
+
+/* التوهج ملاصق لحافة الصورة — يخرج من يسار الـ cover نحو البودي */
+.game-cover-glow{
+  position:absolute;
+  top:0;bottom:0;
+  left:100%;
+  width:55px;
+  background:var(--gcard-gradient, linear-gradient(to bottom,rgba(74,222,128,0.75),rgba(74,222,128,0.4)));
+  filter:blur(22px);
+  opacity:0.85;
+  pointer-events:none;
+  z-index:0;
+  transition:opacity 0.4s, filter 0.4s, width 0.4s;
+}
+.game-card:hover .game-cover-glow{
+  opacity:1;
+  filter:blur(28px);
+  width:65px;
+}
+.game-card:hover{
+  border-color:rgba(74,222,128,0.25);
+  transform:translateY(-5px) scale(1.018);
+  box-shadow:0 18px 50px rgba(0,0,0,0.6);
+}
+/* الجزء الداخلي يحتاج overflow hidden بشكل منفصل */
+.game-card-inner-clip{
+  display:flex;flex-direction:row;align-items:stretch;
+  width:100%;border-radius:18px;overflow:hidden;
+}
+
+/* شريط جانبي ملون */
+.game-card-stripe{
+  width:5px;
+  flex-shrink:0;
+  background:linear-gradient(to bottom,#4ade80,#22c55e,#16a34a);
+  box-shadow:0 0 12px rgba(74,222,128,0.5);
+  border-radius:0 0 0 0;
+  position:relative;
+}
+.game-card-stripe::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(255,255,255,0.3),transparent,rgba(255,255,255,0.1));
+}
+
+/* صورة الغلاف */
+.game-card-cover{
+  width:100px;
+  flex-shrink:0;
+  overflow:visible;
+  position:relative;
+  z-index:1;
+}
+/* الـ clip الداخلي يحافظ على الصورة */
+.game-cover-clip{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  border-radius:0;
+}
+.game-card-cover img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+  display:block;
+}
+.game-card:hover .game-card-cover img{transform:scale(1.1);}
+.game-card-cover-placeholder{
+  width:100%;height:100%;
+  background:linear-gradient(135deg,rgba(74,222,128,0.15),rgba(74,222,128,0.06));
+  display:flex;align-items:center;justify-content:center;
+  font-size:42px;
+  transition:transform 0.4s ease;
+  position:relative;
+}
+.game-card:hover .game-card-cover-placeholder{transform:scale(1.06);}
+
+/* تأثير scanline على الصورة */
+.game-card-cover::before{
+  content:'';
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.04) 3px,
+    rgba(0,0,0,0.04) 4px
+  );
+  pointer-events:none;z-index:2;
+}
+/* خط ضوء ماسح */
+.game-card-cover::after{
+  content:'';
+  position:absolute;
+  left:0;right:0;height:30px;
+  background:linear-gradient(to bottom,transparent,rgba(74,222,128,0.08),transparent);
+  top:-30px;
+  animation:scanline 3.5s linear infinite;
+  pointer-events:none;z-index:3;
+}
+
+/* جسم المعلومات */
+.game-card-body{
+  flex:1;padding:14px 14px 12px;
+  display:flex;flex-direction:column;
+  justify-content:space-between;
+  min-width:0;
+  position:relative;
+}
+
+/* زخرفة كونترولر خفية في الخلفية */
+.game-card-body::before{
+  content:'🎮';
+  position:absolute;
+  bottom:-4px;left:8px;
+  font-size:50px;
+  opacity:0.04;
+  pointer-events:none;
+  transition:opacity 0.3s;
+}
+.game-card:hover .game-card-body::before{opacity:0.07;}
+
+.game-card-name{
+  font-size:15px;font-weight:800;
+  color:var(--text);line-height:1.3;
+  letter-spacing:0.1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+.game-card-series{
+  font-size:10.5px;color:var(--games);
+  font-weight:700;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+.game-card-meta{
+  display:flex;align-items:center;gap:6px;
+  flex-wrap:wrap;margin-top:4px;
+}
+
+.game-card-footer{
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+  margin-top:auto;
+}
+
+.game-status-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;padding:4px 10px;border-radius:8px;
+  font-weight:700;letter-spacing:0.2px;
+  position:relative;overflow:hidden;
+}
+.game-status-badge::before{
+  content:'';position:absolute;inset:0;
+  background:inherit;filter:brightness(1.4);opacity:0;
+  transition:opacity 0.2s;
+}
+.game-card:hover .game-status-badge::before{opacity:0.15;}
+
+/* indicator ضوء ملون حسب الحالة */
+.game-status-led{
+  width:6px;height:6px;border-radius:50%;
+  flex-shrink:0;
+  animation:pulseDot 2s ease-in-out infinite;
+}
+
+.game-score-chip{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:12px;font-weight:800;color:#fbbf24;
+  background:rgba(251,191,36,0.12);
+  border:1px solid rgba(251,191,36,0.2);
+  border-radius:8px;padding:3px 9px;
+}
+
+/* note dot للألعاب */
+.game-card .has-note-dot{top:8px;right:8px;}
+
+/* 3 نقاط للألعاب */
+.game-card .card-menu-wrap{
+  position:absolute;top:8px;left:8px;z-index:10;
+}
+.game-card .card-dots{opacity:0;transition:opacity 0.2s;}
+.game-card:hover .card-dots{opacity:1;}
+
+/* add card للألعاب */
+.game-add-card{
+  background:transparent;
+  border:1.5px dashed rgba(74,222,128,0.25);
+  border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  color:rgba(74,222,128,0.5);
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;
+  gap:8px;
+  height:130px;
+  width:100%;
+  transition:all 0.28s cubic-bezier(0.34,1.3,0.64,1);
+}
+.game-add-card .plus{font-size:26px;opacity:0.5;transition:all 0.28s cubic-bezier(0.34,1.56,0.64,1);}
+.game-add-card:hover{
+  border-color:rgba(74,222,128,0.5);
+  color:var(--games);
+  background:rgba(74,222,128,0.05);
+  box-shadow:0 0 30px rgba(74,222,128,0.06);
+}
+.game-add-card:hover .plus{opacity:1;transform:scale(1.3) rotate(90deg);}
 
 /* ══ 3-dot menu ══ */
 .card-menu-wrap{position:absolute;top:10px;left:10px;z-index:10;}
@@ -1425,6 +1657,7 @@ body{min-height:100vh;min-height:-webkit-fill-available;min-height:100dvh;overfl
               <option value="watching">أشاهده حالياً</option>
               <option value="completed">تمت المشاهدة</option>
             </select>
+
           </div>
           <div class="field">
             <label>تقييم من 10</label>
@@ -1681,6 +1914,8 @@ const ALL_CATS=[...LIB_CATS,...SOCIAL_CATS];
 const STATUS_LABEL={planned:'أرغب بمشاهدته',watching:'أشاهده حالياً',completed:'تمت المشاهدة'};
 const STATUS_CLASS={planned:'s-planned',watching:'s-watching',completed:'s-completed'};
 const STATUSES=['الكل','أرغب بمشاهدته','أشاهده حالياً','تمت المشاهدة'];
+function getStatusLabel(status,cat){return STATUS_LABEL[status]||status;}
+function getStatuses(cat){return STATUSES;}
 const PRIORITY_LABEL={high:'عالية',mid:'متوسطة',low:'منخفضة'};
 const PRIORITY_CLASS={high:'p-high',mid:'p-mid',low:'p-low'};
 const PRIORITY_ORDER={high:0,mid:1,low:2,'':3};
@@ -1860,7 +2095,7 @@ function openDetail(id){
     :`<div class="detail-img-placeholder">${cat.icon}</div>`;
   document.getElementById('detail-title').textContent=item.name;
   let b=`<span class="detail-cat">${cat.icon} ${cat.id}</span>`;
-  if(item.status)b+=`<span class="status-badge ${STATUS_CLASS[item.status]}">${STATUS_LABEL[item.status]}</span>`;
+  if(item.status)b+=`<span class="status-badge ${STATUS_CLASS[item.status]}">${getStatusLabel(item.status,item.cat)}</span>`;
   if(item.priority)b+=`<span class="priority-badge ${PRIORITY_CLASS[item.priority]}">${PRIORITY_LABEL[item.priority]}</span>`;
   document.getElementById('detail-badges').innerHTML=b;
   let r='';
@@ -1926,6 +2161,63 @@ function menuHTML(id){
   </div>`;
 }
 
+// ══ استخراج اللون المهيمن من الصورة ══
+const _imgColorCache = {};
+
+function applyGameCardColors(cardEl, imgUrl) {
+  if(!imgUrl) return;
+  if(_imgColorCache[imgUrl]){ _setGlowGradient(cardEl, _imgColorCache[imgUrl]); return; }
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function(){
+    try{
+      // نأخذ عمود ضيق (3px) من الحافة اليمنى للصورة بأكملها
+      // ونسمبله على 20 نقطة عمودية — هذا يعطي gradient حقيقي من ألوان الحافة
+      const SAMPLES = 20;
+      const canvas = document.createElement('canvas');
+      canvas.width = 3; canvas.height = SAMPLES;
+      const ctx = canvas.getContext('2d');
+      // نرسم الحافة اليمنى (آخر 3px من الصورة) ونضغطها على SAMPLES صف
+      ctx.drawImage(img, img.naturalWidth - 3, 0, 3, img.naturalHeight, 0, 0, 3, SAMPLES);
+      const data = ctx.getImageData(0, 0, 3, SAMPLES).data;
+
+      const stops = [];
+      for(let row = 0; row < SAMPLES; row++){
+        // متوسط الـ 3 بكسلات في هذا الصف
+        let r=0, g=0, b=0;
+        for(let col=0; col<3; col++){
+          const i=(row*3+col)*4;
+          r+=data[i]; g+=data[i+1]; b+=data[i+2];
+        }
+        r=Math.round(r/3); g=Math.round(g/3); b=Math.round(b/3);
+        // رفع الإشباع قليلاً ليكون التوهج واضح
+        const mid=(r+g+b)/3, boost=1.8;
+        r=Math.min(255,Math.round(mid+(r-mid)*boost));
+        g=Math.min(255,Math.round(mid+(g-mid)*boost));
+        b=Math.min(255,Math.round(mid+(b-mid)*boost));
+        stops.push([r,g,b]);
+      }
+      _imgColorCache[imgUrl] = stops;
+      _setGlowGradient(cardEl, stops);
+    }catch(e){}
+  };
+  img.onerror=()=>{};
+  img.src = imgUrl;
+}
+
+function _setGlowGradient(cardEl, stops){
+  if(!stops||!stops.length) return;
+  const grad = `linear-gradient(to bottom, ${stops.map(([r,g,b],i)=>`rgba(${r},${g},${b},0.9) ${Math.round(i/(stops.length-1)*100)}%`).join(',')})`;
+  const solidGrad = `linear-gradient(to bottom, ${stops.map(([r,g,b],i)=>`rgb(${r},${g},${b}) ${Math.round(i/(stops.length-1)*100)}%`).join(',')})`;
+  // التوهج الملاصق للصورة
+  const glow = cardEl.querySelector('.game-cover-glow');
+  if(glow) glow.style.background = grad;
+  // شريط الجانب الأيسر
+  const stripe = cardEl.querySelector('.game-card-stripe');
+  if(stripe){ stripe.style.background = solidGrad; stripe.style.boxShadow='none'; }
+}
+
 // ══ RENDER LIB ══
 function renderLib(){
   const libItems=window.items.filter(i=>isLib(i.cat));
@@ -1961,10 +2253,51 @@ function renderLib(){
 
   const sf=catStatus[activeLibCat];
   const q=libSearch;
-  let filtered=sortItems(window.items.filter(i=>i.cat===activeLibCat&&(sf==='الكل'||STATUS_LABEL[i.status]===sf)&&matchSearch(i,q)),'lib-sort');
-  const pills=STATUSES.map(s=>`<button class="pill${sf===s?' active':''}" onclick="setLibStatus('${s}')">${s}</button>`).join('');
+  let filtered=sortItems(window.items.filter(i=>i.cat===activeLibCat&&(sf==='الكل'||getStatusLabel(i.status,activeLibCat)===sf)&&matchSearch(i,q)),'lib-sort');
+  const pills=getStatuses(activeLibCat).map(s=>`<button class="pill${sf===s?' active':''}" onclick="setLibStatus('${s}')">${s}</button>`).join('');
+
+  const isGames = activeLibCat === 'ألعاب';
 
   let cards=filtered.map((i,idx)=>{
+    if(isGames){
+      // ══ بطاقة الألعاب الخاصة ══
+      const ledColor = i.status==='completed' ? '#4ade80' : i.status==='watching' ? '#60a5fa' : '#c084fc';
+      const statusText = getStatusLabel(i.status, 'ألعاب');
+      const statusClass = STATUS_CLASS[i.status] || '';
+      return `
+      <div class="game-card" style="animation-delay:${idx*0.05}s" data-img="${i.img||''}">
+        <div class="game-card-inner-clip">
+          <div class="game-card-stripe"></div>
+          ${menuHTML(i.id)}
+          ${i.note?`<div class="has-note-dot"></div>`:''}
+          <div class="game-card-cover">
+            <div class="game-cover-clip" onclick="openDetail(${i.id})">
+              ${i.img
+                ? `<img src="${i.img}" loading="lazy" alt="${i.name}">`
+                : `<div class="game-card-cover-placeholder">🎮</div>`}
+            </div>
+            <div class="game-cover-glow"></div>
+          </div>
+          <div class="game-card-body" onclick="openDetail(${i.id})">
+            <div>
+              <div class="game-card-name">${i.name}</div>
+              ${i.series?`<div class="game-card-series" onclick="event.stopPropagation();document.getElementById('lib-search').value='${i.series.replace(/'/g,"\\'")}';libSearch='${i.series.replace(/'/g,"\\'")}';renderLib();">🔗 ${i.series}</div>`:''}
+            </div>
+            <div class="game-card-meta">
+              ${i.priority?`<span class="priority-badge ${PRIORITY_CLASS[i.priority]}">${PRIORITY_LABEL[i.priority]}</span>`:''}
+              ${i.dateAdded?`<span class="card-date" style="font-size:10px;">📅 ${formatDate(i.dateAdded)}</span>`:''}
+            </div>
+            <div class="game-card-footer">
+              <span class="game-status-badge ${statusClass}" style="background:${ledColor}18;border:1px solid ${ledColor}30;">
+                <span class="game-status-led" style="background:${ledColor};box-shadow:0 0 6px ${ledColor};"></span>
+                ${statusText}
+              </span>
+              ${i.score?`<span class="game-score-chip">★ ${i.score}/10</span>`:''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
     const scoreBar=i.score?`<div class="card-score-bar">
       <div class="score-bar-track"><div class="score-bar-fill" style="width:${i.score*10}%"></div></div>
       <span class="card-score-label">★ ${i.score}/10</span>
@@ -1987,22 +2320,32 @@ function renderLib(){
             ${i.dateAdded?`<span class="card-date">📅 ${formatDate(i.dateAdded)}</span>`:''}
           </div>
           <div class="card-bottom">
-            <span class="status-badge ${STATUS_CLASS[i.status]}">${STATUS_LABEL[i.status]}</span>
+            <span class="status-badge ${STATUS_CLASS[i.status]}">${getStatusLabel(i.status,i.cat)}</span>
           </div>
           ${scoreBar}
         </div>
       </div>
     </div>`;
   }).join('');
-  cards+=`<button class="add-card lib-add-card" onclick="openAdd('${activeLibCat}','lib')"><span class="plus">+</span>إضافة</button>`;
+  cards += isGames
+    ? `<button class="game-add-card" onclick="openAdd('${activeLibCat}','lib')"><span class="plus">+</span>إضافة لعبة</button>`
+    : `<button class="add-card lib-add-card" onclick="openAdd('${activeLibCat}','lib')"><span class="plus">+</span>إضافة</button>`;
   document.getElementById('lib-section').innerHTML=`
     <div>
       <div class="section-header">
         <div class="section-title" style="--cat-color:${cat.color}"><span class="cat-dot"></span>${cat.icon} ${cat.id}</div>
         <div class="filter-pills">${pills}</div>
       </div>
-      <div class="grid">${filtered.length?cards:`<div class="empty">${cat.icon}<br>لا يوجد عناصر هنا بعد</div>`}</div>
+      <div class="${isGames?'grid-games':'grid'}">${filtered.length?cards:`<div class="empty">${cat.icon}<br>لا يوجد عناصر هنا بعد</div>`}</div>
     </div>`;
+
+  // تطبيق التوهج المستخرج من الصورة على بطاقات الألعاب
+  if(isGames){
+    document.querySelectorAll('.game-card[data-img]').forEach(cardEl=>{
+      const imgUrl = cardEl.dataset.img;
+      if(imgUrl) applyGameCardColors(cardEl, imgUrl);
+    });
+  }
 }
 
 // ══ RENDER SOCIAL ══
@@ -2107,6 +2450,8 @@ function onCatChange(){
   document.getElementById('modal-save-btn').className=social?'btn-save social-save':'btn-save lib-save';
   document.getElementById('series-wrap').style.display=social?'none':'block';
   populateSeriesSuggestions();
+  const statusField = document.getElementById('f-status')?.closest('.field');
+  if(statusField) statusField.style.display = (cat==='ألعاب') ? 'none' : 'block';
 }
 
 function openAdd(presetCat, tab){
@@ -2117,6 +2462,8 @@ function openAdd(presetCat, tab){
   const defaultCat=presetCat||(tab==='social'?activeSocialCat:activeLibCat);
   document.getElementById('f-cat').value=defaultCat;
   document.getElementById('f-status').value='planned';
+  const _sf = document.getElementById('f-status')?.closest('.field');
+  if(_sf) _sf.style.display = (defaultCat==='ألعاب') ? 'none' : 'block';
   document.getElementById('f-score').value='';
   document.getElementById('f-link').value='';
   document.getElementById('f-priority').value='';
