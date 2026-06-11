@@ -3876,6 +3876,8 @@ function loadGuestData() {
   window.renderSocial();
   if(typeof window._updateFavBadges==='function') window._updateFavBadges();
 }
+
+function saveGuestData() {
   if (localStorage.getItem('mk_guest_mode') !== '1') return;
   localStorage.setItem('mk_guest_items', JSON.stringify({
     items:  window.items,
