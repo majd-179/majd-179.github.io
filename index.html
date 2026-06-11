@@ -1651,6 +1651,51 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
   box-shadow: 0 0 12px rgba(248,113,113,0.3);
 }
 
+/* ══ عداد الحلقات/الفصول داخل التفاصيل ══ */
+.detail-chapter-ctrl {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+  background: var(--glass);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-top: 2px;
+}
+.detail-chapter-info {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.detail-chapter-label {
+  font-size: 10px; font-weight: 700;
+  color: var(--muted2); text-transform: uppercase; letter-spacing: 0.5px;
+}
+.detail-chapter-val {
+  font-size: 20px; font-weight: 900;
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  line-height: 1.1;
+}
+.detail-chapter-val span { font-size: 13px; color: var(--muted2); font-weight: 600; }
+.detail-ch-btns { display: flex; gap: 8px; }
+.detail-ch-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--surface3);
+  color: var(--text2); font-size: 18px; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1);
+}
+.detail-ch-btn:hover { transform: scale(1.15); }
+.detail-ch-btn.ch-minus:hover { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.4); color: var(--red); }
+.detail-ch-btn.ch-plus:hover  { background: rgba(26,184,168,0.15);  border-color: rgba(26,184,168,0.4);  color: var(--accent); }
+.detail-ch-btn:active { transform: scale(0.9); }
+@keyframes detailChBump {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.detail-chapter-val.bump { animation: detailChBump 0.22s ease; }
+
 /* زر تسجيل الخروج */
 .profile-logout-btn{
   display:flex;align-items:center;justify-content:center;gap:8px;
@@ -2299,11 +2344,25 @@ function openDetail(id){
   let r='';
   if(item.score)r+=`<div class="detail-row"><span class="detail-row-label">التقييم</span><span class="detail-row-val">★ ${item.score}/10</span></div>`;
   if(item.series)r+=`<div class="detail-row"><span class="detail-row-label">السلسلة</span><span class="detail-row-val" style="color:var(--accent);cursor:pointer;" onclick="closeDetail();document.getElementById('lib-search').value='${item.series.replace(/'/g,"\\'")}';libSearch='${item.series.replace(/'/g,"\\'")}';renderLib();">🔗 ${item.series} ← عرض كل الأجزاء</span></div>`;
-  if(item.chapter){
-    const chLabel={'مانغا':'آخر فصل','أنمي':'آخر حلقة','كتب':'آخر صفحة','مسلسلات':'آخر حلقة'};
+  const chapterCats = ['مانغا','أنمي','كتب','مسلسلات'];
+  if(chapterCats.includes(item.cat)){
+    const chLabel={'مانغا':'الفصل','أنمي':'الحلقة','كتب':'الصفحة','مسلسلات':'الحلقة'};
     const chIcon={'مانغا':'📖','أنمي':'▶️','كتب':'📄','مسلسلات':'▶️'};
-    const lbl=chLabel[item.cat]||'التقدم';const ico=chIcon[item.cat]||'📌';
-    r+=`<div class="detail-row"><span class="detail-row-label">${lbl}</span><span class="detail-row-val">${ico} ${item.chapter}</span></div>`;
+    const lbl=chLabel[item.cat];const ico=chIcon[item.cat];
+    const cur=item.chapter||0;
+    r+=`<div class="detail-row" style="padding:10px 15px;">
+      <span class="detail-row-label">${lbl}</span>
+      <div class="detail-chapter-ctrl">
+        <div class="detail-chapter-info">
+          <div class="detail-chapter-label">${ico} ${lbl} الحالية</div>
+          <div class="detail-chapter-val" id="detail-chval-${item.id}">${cur} <span>${lbl}</span></div>
+        </div>
+        <div class="detail-ch-btns">
+          <button class="detail-ch-btn ch-minus" onclick="detailChangeChapter(${item.id},-1)">−</button>
+          <button class="detail-ch-btn ch-plus"  onclick="detailChangeChapter(${item.id}, 1)">+</button>
+        </div>
+      </div>
+    </div>`;
   }
   if(item.cat==='مسلسلات'&&item.seasons)r+=`<div class="detail-row"><span class="detail-row-label">عدد المواسم</span><span class="detail-row-val">📺 ${item.seasons} موسم</span></div>`;
   if(item.dateAdded)r+=`<div class="detail-row"><span class="detail-row-label">تاريخ الإضافة</span><span class="detail-row-val">📅 ${formatDate(item.dateAdded)}</span></div>`;
@@ -2903,6 +2962,28 @@ function saveItem(){
   if(activePage==='lib')renderLib(); else renderSocial();
   _updateFavBadges();
 }
+
+function detailChangeChapter(id, delta) {
+  const idx = window.items.findIndex(i => i.id === id);
+  if (idx === -1) return;
+  const item = window.items[idx];
+  const cur = item.chapter || 0;
+  const next = Math.max(0, cur + delta);
+  item.chapter = next;
+  save();
+
+  const chLabel={'مانغا':'الفصل','أنمي':'الحلقة','كتب':'الصفحة','مسلسلات':'الحلقة'};
+  const el = document.getElementById('detail-chval-' + id);
+  if (el) {
+    el.innerHTML = `${next} <span>${chLabel[item.cat]||'حلقة'}</span>`;
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
+  // تحديث الكرت في الخلفية بدون إغلاق التفاصيل
+  if(activePage==='lib') renderLib(); else renderSocial();
+}
+window.detailChangeChapter = detailChangeChapter;
 
 function deleteItem(id){
   window.items=window.items.filter(i=>i.id!==id);save();closeModal();
