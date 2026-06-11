@@ -3216,6 +3216,33 @@ window.activePage=activePage;
 renderLib();
 renderSocial();
 _updateFavBadges();
+
+// ══ دوال الإعدادات — معرّفة هنا لتكون متاحة فوراً قبل تحميل Firebase ══
+function openSettingsFn() {
+  const ti = document.getElementById('theme-settings-icon');
+  const tt = document.getElementById('theme-settings-text');
+  const isDark = !document.body.classList.contains('light');
+  if(ti) ti.textContent = isDark ? '🌙' : '☀️';
+  if(tt) tt.textContent = isDark ? 'الوضع الليلي' : 'الوضع النهاري';
+  document.getElementById('settings-overlay').classList.add('open');
+  document.getElementById('settings-panel').classList.add('open');
+}
+function closeSettingsFn() {
+  document.getElementById('settings-overlay').classList.remove('open');
+  document.getElementById('settings-panel').classList.remove('open');
+}
+window.openSettingsFn  = openSettingsFn;
+window.closeSettingsFn = closeSettingsFn;
+document.getElementById('settings-overlay').addEventListener('click', closeSettingsFn);
+document.getElementById('settings-close-btn').addEventListener('click', closeSettingsFn);
+document.getElementById('settings-theme-btn').addEventListener('click', () => {
+  window.toggleTheme();
+  const ti = document.getElementById('theme-settings-icon');
+  const tt = document.getElementById('theme-settings-text');
+  const isDark = !document.body.classList.contains('light');
+  if(ti) ti.textContent = isDark ? '🌙' : '☀️';
+  if(tt) tt.textContent = isDark ? 'الوضع الليلي' : 'الوضع النهاري';
+});
 </script>
 
 <!-- ══════════ FIREBASE ══════════ -->
@@ -3529,11 +3556,13 @@ function openSettingsFn() {
   document.getElementById('settings-overlay').classList.add('open');
   document.getElementById('settings-panel').classList.add('open');
 }
+window.openSettingsFn = openSettingsFn;
 
 function closeSettingsFn() {
   document.getElementById('settings-overlay').classList.remove('open');
   document.getElementById('settings-panel').classList.remove('open');
 }
+window.closeSettingsFn = closeSettingsFn;
 
 function toggleSwitchMenuFn() {
   const sub = document.getElementById('switch-submenu');
