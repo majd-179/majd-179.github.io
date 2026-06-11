@@ -1671,8 +1671,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 <!-- ══════════ PAGE: LIBRARY ══════════ -->
 <div class="page active" id="page-lib">
   <div class="hero">
-    <button class="hero-left hero-logo-btn" data-action="openSettings" title="الإعدادات">
-      <div class="hero-icon lib-icon">📚</div>
+    <button class="hero-left hero-logo-btn" onclick="if(typeof openSettingsFn==='function')openSettingsFn();" title="الإعدادات">
       <div>
         <div class="hero-title">المكتبة</div>
         <div class="hero-sub">أنمي · مانغا · كتب · ألعاب · أفلام · مسلسلات</div>
@@ -1706,7 +1705,7 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 <!-- ══════════ PAGE: SOCIAL ══════════ -->
 <div class="page" id="page-social">
   <div class="hero">
-    <button class="hero-left hero-logo-btn" data-action="openSettings" title="الإعدادات">
+    <button class="hero-left hero-logo-btn" onclick="if(typeof openSettingsFn==='function')openSettingsFn();" title="الإعدادات">
       <div class="hero-icon social-icon">🎵</div>
       <div>
         <div class="hero-title social-title">وسائل التواصل</div>
@@ -3797,7 +3796,7 @@ window._cloudSave = function() {
 
 // ══ تسجيل الدخول / الخروج ══
 window.handleLogin = function() {
-  openSettings();
+  if(typeof openSettingsFn === 'function') openSettingsFn();
 };
 
 // ══ شاشة التحميل ══
