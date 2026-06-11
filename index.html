@@ -1482,6 +1482,175 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 .profile-saved-acc-btn img{width:26px;height:26px;border-radius:50%;object-fit:cover;}
 .profile-saved-acc-btn .acc-name{flex:1;}
 
+/* ══ زر القلب في التفاصيل ══ */
+@keyframes heartPop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.55) rotate(-8deg); }
+  60%  { transform: scale(0.88) rotate(4deg); }
+  80%  { transform: scale(1.18) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes heartParticle {
+  0%   { opacity:1; transform: translate(0,0) scale(1); }
+  100% { opacity:0; transform: translate(var(--tx), var(--ty)) scale(0.3); }
+}
+.detail-fav-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+  font-size: 16px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  flex-shrink: 0;
+  position: relative;
+  overflow: visible;
+}
+.detail-fav-btn:hover {
+  background: rgba(248,113,113,0.12);
+  border-color: rgba(248,113,113,0.3);
+  color: #f87171;
+  transform: scale(1.1);
+}
+.detail-fav-btn.active {
+  background: rgba(248,113,113,0.18);
+  border-color: rgba(248,113,113,0.45);
+  color: #f87171;
+  box-shadow: 0 0 18px rgba(248,113,113,0.35), 0 0 6px rgba(248,113,113,0.2);
+}
+.detail-fav-btn.active .fav-heart-icon {
+  animation: heartPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.fav-particle {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #f87171;
+  pointer-events: none;
+  animation: heartParticle 0.55s ease-out both;
+}
+
+/* ══ صفحة المفضلة ══ */
+.fav-page {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--bg);
+  transform: translateX(100%);
+  transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.fav-page.open { transform: translateX(0); }
+.fav-page-header {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 14px;
+  padding: 1.1rem 1.25rem 1rem;
+  background: linear-gradient(to bottom, var(--bg) 70%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.fav-page-back {
+  background: var(--glass2); border: 1px solid var(--border2);
+  color: var(--text2); font-size: 20px;
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.fav-page-back:hover { background: var(--surface3); transform: scale(1.1); }
+.fav-page-title {
+  font-family: 'Cairo', sans-serif;
+  font-size: 20px; font-weight: 900;
+  background: linear-gradient(120deg, #f87171, #f472b6);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.fav-count-badge {
+  font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+  background: rgba(248,113,113,0.14);
+  border: 1px solid rgba(248,113,113,0.28);
+  color: #f87171;
+}
+.fav-page-inner {
+  max-width: 1060px; margin: 0 auto;
+  padding: 1.5rem 1.25rem 6rem;
+}
+.fav-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 16px;
+  padding: 6rem 2rem; text-align: center;
+  color: var(--muted);
+}
+.fav-empty-heart {
+  font-size: 64px;
+  filter: grayscale(1) opacity(0.3);
+  animation: titleFloat 4s ease-in-out infinite;
+}
+.fav-empty-text { font-size: 15px; line-height: 1.8; }
+.fav-empty-sub { font-size: 12px; color: var(--muted); }
+
+/* فلاتر المفضلة */
+.fav-filters {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.fav-filter-btn {
+  padding: 7px 14px; border-radius: 20px;
+  font-family: 'Tajawal', sans-serif; font-size: 12px; font-weight: 700;
+  border: 1px solid var(--border2); background: var(--glass);
+  color: var(--muted2); cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34,1.3,0.64,1);
+}
+.fav-filter-btn:hover { color: var(--text); border-color: var(--border3); }
+.fav-filter-btn.active {
+  background: rgba(248,113,113,0.14);
+  border-color: rgba(248,113,113,0.35);
+  color: #f87171;
+}
+
+/* بطاقة المفضلة المصغّرة */
+.fav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px; }
+@keyframes favCardIn { from{opacity:0;transform:translateY(18px) scale(0.96);} to{opacity:1;transform:translateY(0) scale(1);} }
+.fav-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34,1.4,0.64,1);
+  animation: favCardIn 0.35s ease both;
+  position: relative;
+}
+.fav-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(248,113,113,0.35);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(248,113,113,0.15), 0 0 30px rgba(248,113,113,0.08);
+}
+.fav-card-img { width:100%; height: 200px; object-fit: cover; display: block; transition: transform 0.5s ease; }
+.fav-card:hover .fav-card-img { transform: scale(1.07); }
+.fav-card-placeholder {
+  width:100%; height:200px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:52px;
+  background: linear-gradient(135deg, var(--surface2), var(--surface3));
+  transition: transform 0.5s ease;
+}
+.fav-card:hover .fav-card-placeholder { transform: scale(1.06); }
+.fav-card-body { padding: 11px 13px 13px; }
+.fav-card-name { font-size: 13.5px; font-weight: 800; color: var(--text); line-height: 1.35; margin-bottom: 6px; }
+.fav-card-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.fav-heart-corner {
+  position: absolute; top: 9px; left: 9px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  border: 1px solid rgba(248,113,113,0.3);
+  box-shadow: 0 0 12px rgba(248,113,113,0.3);
+}
+
 /* زر تسجيل الخروج */
 .profile-logout-btn{
   display:flex;align-items:center;justify-content:center;gap:8px;
@@ -1577,6 +1746,19 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
   </div>
 </div>
 
+<!-- ══ Favorites Page ══ -->
+<div class="fav-page" id="fav-page">
+  <div class="fav-page-header">
+    <button class="fav-page-back" onclick="closeFavPage()">←</button>
+    <div class="fav-page-title">❤️ المفضلة</div>
+    <span class="fav-count-badge" id="fav-count-badge">0</span>
+  </div>
+  <div class="fav-page-inner">
+    <div class="fav-filters" id="fav-filters"></div>
+    <div id="fav-content"></div>
+  </div>
+</div>
+
 <!-- ══ Detail Popup ══ -->
 <div class="detail-bg" id="detail-bg">
   <div class="detail-popup">
@@ -1584,7 +1766,12 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
     <div class="detail-body">
       <div class="detail-header">
         <div class="detail-title" id="detail-title"></div>
-        <button class="detail-close" onclick="closeDetail()">✕</button>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <button class="detail-fav-btn" id="detail-fav-btn" onclick="toggleFavFromDetail()" title="إضافة للمفضلة">
+            <span class="fav-heart-icon">🤍</span>
+          </button>
+          <button class="detail-close" onclick="closeDetail()">✕</button>
+        </div>
       </div>
       <div class="detail-badges" id="detail-badges"></div>
       <div class="detail-rows" id="detail-rows"></div>
@@ -1867,6 +2054,14 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
     <span class="settings-item-arrow">›</span>
   </button>
 
+  <div class="settings-section-label">المجموعة</div>
+  <button class="settings-item" id="settings-fav-btn" onclick="openFavPage()">
+    <span class="settings-item-icon">❤️</span>
+    <span class="settings-item-text">المفضلة</span>
+    <span id="settings-fav-count" style="font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:rgba(248,113,113,0.14);color:#f87171;border:1px solid rgba(248,113,113,0.25);margin-left:auto;margin-right:4px;">0</span>
+    <span class="settings-item-arrow">›</span>
+  </button>
+
   <div class="settings-section-label">العرض</div>
   <button class="settings-item" id="settings-stats-btn">
     <span class="settings-item-icon">📊</span>
@@ -2087,7 +2282,11 @@ function closeAllMenus(){document.querySelectorAll('.card-dropdown.open').forEac
 document.addEventListener('click',closeAllMenus);
 
 // ══ DETAIL ══
+// ══ DETAIL — تتبع الـ ID المفتوح ══
+let _currentDetailId = null;
+
 function openDetail(id){
+  _currentDetailId = id;
   const item=window.items.find(i=>i.id===id);if(!item)return;
   const cat=catCfg(item.cat);const sc=SOCIAL_CATS.find(c=>c.id===item.cat);
   document.getElementById('detail-img-area').innerHTML=item.img
@@ -2113,9 +2312,165 @@ function openDetail(id){
   document.getElementById('detail-rows').innerHTML=r;
   document.getElementById('detail-note-section').innerHTML=`<div class="detail-note-label">ملاحظة شخصية</div>`+
     (item.note?`<div class="detail-note-text">${item.note.replace(/</g,'&lt;')}</div>`:`<div class="detail-note-empty">لا توجد ملاحظة — اضغط ⋯ ثم تعديل لإضافتها</div>`);
+  // تحديث زر القلب
+  _updateFavBtn(item);
   document.getElementById('detail-bg').classList.add('open');
 }
-function closeDetail(){document.getElementById('detail-bg').classList.remove('open');}
+
+function _updateFavBtn(item) {
+  const btn = document.getElementById('detail-fav-btn');
+  if (!btn) return;
+  const isFav = !!item.favorited;
+  btn.classList.toggle('active', isFav);
+  btn.querySelector('.fav-heart-icon').textContent = isFav ? '❤️' : '🤍';
+}
+
+function toggleFavFromDetail() {
+  if (_currentDetailId === null) return;
+  const idx = window.items.findIndex(i => i.id === _currentDetailId);
+  if (idx === -1) return;
+  const item = window.items[idx];
+  item.favorited = !item.favorited;
+  _updateFavBtn(item);
+  // تأثير الجسيمات عند التفعيل
+  if (item.favorited) {
+    _spawnHeartParticles();
+    showToast('❤️ أُضيف للمفضلة');
+  } else {
+    showToast('💔 أُزيل من المفضلة');
+  }
+  save();
+  _updateFavBadges();
+}
+
+function _spawnHeartParticles() {
+  const btn = document.getElementById('detail-fav-btn');
+  if (!btn) return;
+  const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+  angles.forEach((angle, i) => {
+    const p = document.createElement('div');
+    p.className = 'fav-particle';
+    const rad = (angle * Math.PI) / 180;
+    const dist = 24 + Math.random() * 14;
+    p.style.setProperty('--tx', `${Math.cos(rad)*dist}px`);
+    p.style.setProperty('--ty', `${Math.sin(rad)*dist}px`);
+    p.style.animationDelay = `${i * 0.03}s`;
+    p.style.background = i % 2 === 0 ? '#f87171' : '#f472b6';
+    btn.appendChild(p);
+    setTimeout(() => p.remove(), 700);
+  });
+}
+
+function _updateFavBadges() {
+  const cnt = window.items.filter(i => i.favorited).length;
+  const badge = document.getElementById('fav-count-badge');
+  if (badge) badge.textContent = cnt;
+  const settingsCnt = document.getElementById('settings-fav-count');
+  if (settingsCnt) settingsCnt.textContent = cnt;
+}
+
+// ══ صفحة المفضلة ══
+let _favFilterCat = 'الكل';
+
+function openFavPage() {
+  _favFilterCat = 'الكل';
+  _renderFavPage();
+  document.getElementById('fav-page').classList.add('open');
+  // أغلق الإعدادات
+  const sp = document.getElementById('settings-panel');
+  const so = document.getElementById('settings-overlay');
+  if (sp) sp.classList.remove('open');
+  if (so) so.classList.remove('open');
+}
+
+function closeFavPage() {
+  document.getElementById('fav-page').classList.remove('open');
+}
+
+function _renderFavPage() {
+  const favItems = window.items.filter(i => i.favorited);
+  const cnt = favItems.length;
+
+  const badge = document.getElementById('fav-count-badge');
+  if (badge) badge.textContent = cnt;
+
+  // فلاتر الفئات الموجودة في المفضلة
+  const catsInFav = [...new Set(favItems.map(i => i.cat))];
+  const filtersEl = document.getElementById('fav-filters');
+  if (filtersEl) {
+    let fhtml = `<button class="fav-filter-btn${_favFilterCat==='الكل'?' active':''}" onclick="_setFavFilter('الكل')">🎲 الكل <span style="opacity:0.6">(${cnt})</span></button>`;
+    catsInFav.forEach(catId => {
+      const c = catCfg(catId);
+      const n = favItems.filter(i=>i.cat===catId).length;
+      fhtml += `<button class="fav-filter-btn${_favFilterCat===catId?' active':''}" onclick="_setFavFilter('${catId}')">${c.icon} ${catId} <span style="opacity:0.6">(${n})</span></button>`;
+    });
+    filtersEl.innerHTML = fhtml;
+  }
+
+  const contentEl = document.getElementById('fav-content');
+  if (!contentEl) return;
+
+  if (cnt === 0) {
+    contentEl.innerHTML = `
+      <div class="fav-empty">
+        <div class="fav-empty-heart">🤍</div>
+        <div class="fav-empty-text">مفضلتك فاضية حتى الآن</div>
+        <div class="fav-empty-sub">اضغط على ❤️ في أي بطاقة لتضيفها هنا</div>
+      </div>`;
+    return;
+  }
+
+  const filtered = _favFilterCat === 'الكل'
+    ? favItems
+    : favItems.filter(i => i.cat === _favFilterCat);
+
+  if (filtered.length === 0) {
+    contentEl.innerHTML = `<div class="fav-empty"><div class="fav-empty-heart">🔍</div><div class="fav-empty-text">لا يوجد عناصر في هذا القسم</div></div>`;
+    return;
+  }
+
+  const cardsHtml = filtered.map((item, idx) => {
+    const cat = catCfg(item.cat);
+    return `
+    <div class="fav-card" style="animation-delay:${idx*0.04}s" onclick="openFavDetail(${item.id})">
+      <div class="fav-heart-corner">❤️</div>
+      ${item.img
+        ? `<img class="fav-card-img" src="${item.img}" loading="lazy">`
+        : `<div class="fav-card-placeholder" style="background:linear-gradient(135deg,${cat.color}22,${cat.color}0a)">${cat.icon}</div>`}
+      <div class="fav-card-body">
+        <div class="fav-card-name">${item.name}</div>
+        <div class="fav-card-meta">
+          <span class="detail-cat" style="font-size:10.5px;padding:3px 9px;">${cat.icon} ${cat.id}</span>
+          ${item.score ? `<span class="card-score">★ ${item.score}/10</span>` : ''}
+          ${item.status && item.cat !== 'ألعاب' ? `<span class="status-badge ${STATUS_CLASS[item.status]}" style="font-size:10px;padding:3px 8px;">${getStatusLabel(item.status,item.cat)}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  contentEl.innerHTML = `<div class="fav-grid">${cardsHtml}</div>`;
+}
+
+function _setFavFilter(cat) {
+  _favFilterCat = cat;
+  _renderFavPage();
+}
+
+function openFavDetail(id) {
+  closeFavPage();
+  setTimeout(() => openDetail(id), 120);
+}
+
+window.openFavPage = openFavPage;
+window.closeFavPage = closeFavPage;
+window._setFavFilter = _setFavFilter;
+window.openFavDetail = openFavDetail;
+window.toggleFavFromDetail = toggleFavFromDetail;
+
+function closeDetail(){
+  document.getElementById('detail-bg').classList.remove('open');
+  _currentDetailId = null;
+}
 
 // ══ IMAGE ══
 function triggerFileInput(){document.getElementById('img-file-input').click();}
@@ -2547,11 +2902,13 @@ function saveItem(){
   }
   save();closeModal();
   if(activePage==='lib')renderLib(); else renderSocial();
+  _updateFavBadges();
 }
 
 function deleteItem(id){
   window.items=window.items.filter(i=>i.id!==id);save();closeModal();
   if(activePage==='lib')renderLib(); else renderSocial();
+  _updateFavBadges();
   showToast('تم الحذف');
 }
 
@@ -2844,6 +3201,7 @@ window.openEdit=openEdit;
 window.closeModal=closeModal;
 window.saveItem=saveItem;
 window.deleteItem=deleteItem;
+window._updateFavBadges=_updateFavBadges;
 window.openDetail=openDetail;
 window.closeDetail=closeDetail;
 window.setLibCat=setLibCat;
@@ -2858,6 +3216,7 @@ window.activePage=activePage;
 
 renderLib();
 renderSocial();
+_updateFavBadges();
 </script>
 
 <!-- ══════════ FIREBASE ══════════ -->
@@ -3132,6 +3491,7 @@ function startListening(uid) {
     }
     window.renderLib();
     window.renderSocial();
+    if(typeof window._updateFavBadges==='function') window._updateFavBadges();
   });
 }
 
@@ -3515,9 +3875,8 @@ function loadGuestData() {
   }
   window.renderLib();
   window.renderSocial();
+  if(typeof window._updateFavBadges==='function') window._updateFavBadges();
 }
-
-function saveGuestData() {
   if (localStorage.getItem('mk_guest_mode') !== '1') return;
   localStorage.setItem('mk_guest_items', JSON.stringify({
     items:  window.items,
